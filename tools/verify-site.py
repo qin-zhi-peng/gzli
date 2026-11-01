@@ -41,7 +41,7 @@ ASSETS = [
     ("report.js", "javascript"),
     ("qr.png", "image"),
     ("avatar-320.webp", "webp"),
-    ("avatar-320.png", "image"),
+    ("avatar-512.png", "image"),
     ("favicon.png", "image"),
     ("apple-touch-icon.png", "image"),
     ("icon-192.png", "image"),
@@ -206,6 +206,12 @@ def local_checks():
     for name, kind in ASSETS:
         if kind == "image" and name != "qr.png":
             check(name + " 是 PNG", files.get(name, b"")[:8] == b"\x89PNG\r\n\x1a\n")
+
+    # 图标统一成头像版（透明底圆形徽章，PNG colorType 6 = RGBA）
+    for name in ("favicon.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png"):
+        b = files.get(name, b"")
+        ct = b[25] if len(b) > 25 else None
+        check("图标是头像版（透明底） " + name, ct == 6, "colorType=%s" % ct)
     og = png_size(files.get("og.png", b""))
     check("og.png 尺寸适合分享", bool(og and og[0] >= 600 and og[1] >= 300), str(og))
 
@@ -278,6 +284,9 @@ def live_checks(base):
         check("线上 sitemap 有首页", "<loc>" in sm and "gzli" in sm)
         qr = fetch(base + "qr.png", UA_WECHAT)[2]
         check("线上二维码 PNG", qr[:8] == b"\x89PNG\r\n\x1a\n", "%d bytes" % len(qr))
+        fav = fetch(base + "favicon.png", UA_WECHAT)[2]
+        check("线上 favicon 是头像版（透明底 RGBA）",
+              len(fav) > 25 and fav[25] == 6, "colorType=%s" % (fav[25] if len(fav) > 25 else None))
     except Exception as e:
         check("线上资源内容抽查", False, str(e)[:120])
 
