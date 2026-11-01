@@ -141,25 +141,11 @@
       '<line x1="16.7" y1="8" x2="16.7" y2="36"/><line x1="27.3" y1="8" x2="27.3" y2="36"/></svg>'
   };
 
+  /* 首页只有三个入口，卡片不放长介绍——点进去看盘面，详细报告在板块底部引导微信 */
   var CARDS = [
-    {
-      id: 'mingli', kicker: '结构 · 四柱与紫微',
-      title: '命理', sub: '你手里有什么牌',
-      p: '出生时间定四柱：日主、十神、六亲、财官，再加紫微十二宫与十二段大限，最后给一句简要结论。',
-      meta: '约 3 秒出盘 · 免费', cta: '进入排盘'
-    },
-    {
-      id: 'zhanbu', kicker: '当下 · 象数六爻',
-      title: '占卜', sub: '这一把该怎么出',
-      p: '心里默问一件事，三枚铜钱摇六次。盘面上是六亲、六神、世应、动变、伏神与旬空。',
-      meta: '两次点击 · 免费', cta: '起一卦'
-    },
-    {
-      id: 'zhongyi', kicker: '底子 · 中医调理',
-      title: '中医调理', sub: '身体接不接得住',
-      p: '勾选当下的身体感受：寒热、汗、二便、睡眠、舌象。看证候偏向，给调理思路。',
-      meta: '约 2 分钟 · 免费', cta: '开始自查'
-    }
+    { id: 'mingli', title: '命理', sub: '你手里有什么牌' },
+    { id: 'zhanbu', title: '占卜', sub: '这一把怎么出' },
+    { id: 'zhongyi', title: '中医调理', sub: '身体接不接得住' }
   ];
 
   /* ---------------- 首页 ---------------- */
@@ -167,65 +153,23 @@
     var cards = CARDS.map(function (c) {
       return '<a class="bcard" href="#/' + c.id + '">' +
         ICONS[c.id] +
-        '<h3>' + esc(c.title) + '<small>' + esc(c.kicker) + '</small></h3>' +
-        '<p>' + esc(c.p) + '</p>' +
-        '<div class="meta">' + esc(c.meta) + '</div>' +
-        '<div class="go">' + esc(c.cta) + '<span class="arw">→</span></div>' +
+        '<h3>' + esc(c.title) + '</h3>' +
+        '<p>' + esc(c.sub) + '</p>' +
+        '<span class="go">进入<span class="arw">→</span></span>' +
         '</a>';
     }).join('');
 
     return '' +
       '<div class="hero">' +
-        '<div class="sealbig" aria-hidden="true"><span>恒</span></div>' +
-        '<div class="kicker">一 恒 体 系 · 总 领</div>' +
-        '<h1>同一套底层<br><em>三种看法</em></h1>' +
-        '<p class="lead">命理看你手里有什么牌，占卜看这一把该怎么出，中医看你此刻的身体接不接得住。</p>' +
-        '<p class="lead2">三个入口，都从一次输入开始：出生时间、一件事、一组症状。<b>全部在浏览器本地推算，不上传。</b></p>' +
-        '<div class="trust"><span>本地推算</span><span>不上传</span><span>不用注册</span><span>免费体验</span></div>' +
+        '<img class="avatar" src="avatar-320.webp" alt="一恒体系" width="132" height="132" decoding="async" fetchpriority="high">' +
+        '<h1 class="name">一恒体系</h1>' +
       '</div>' +
 
       '<div class="boards">' + cards + '</div>' +
 
-      '<section class="sect">' +
-        '<div class="sect-h"><span class="num">01</span><h2>为什么是这三样<small>一条线，不是三个摊子</small></h2></div>' +
-        '<p class="sect-p">三者共用一套阴阳五行的语言，所以能对着看：命理说方向，占卜说时机，中医说到底子。</p>' +
-        '<div class="sysgrid">' +
-          '<div class="sys"><span class="k">结 构</span><b>命理 · 看牌面</b><span>日主是什么、六亲怎么排、财官有没有力、大运哪十年顺。看的是这一辈子大致拿了什么牌。</span></div>' +
-          '<div class="sys"><span class="k">当 下</span><b>占卜 · 看出牌</b><span>这一件事此刻的势：世应谁强、用神旺不旺、动爻往哪走、什么时候应。看的是这一把怎么出。</span></div>' +
-          '<div class="sys"><span class="k">底 子</span><b>中医 · 看身体</b><span>寒热虚实、脏腑气血、睡眠二便。牌再好、势再顺，底子接不住也白搭。看的是这个人现在的状态。</span></div>' +
-        '</div>' +
-      '</section>' +
-
-      '<section class="sect">' +
-        '<div class="sect-h"><span class="num">02</span><h2>先看盘面<small>完整报告加微信</small></h2></div>' +
-        '<p class="sect-p">免费体验出盘，盘面与一句简要结论直接看，不用注册、不留信息。需要结合你本人逐项推演的部分——四柱结构、断卦与时机、方药与剂量——不在页面上生成，加微信 ' + esc(WX.id) + ' 一对一给。</p>' +
-        '<div class="lock" style="margin-top:4px">' +
-          '<div class="lk-t">加微信 ' + esc(WX.id) + ' · 说清你要问哪个板块</div>' +
-          '<p class="lk-p">命理发出生时间，占卜发卦象或直接说事，中医说症状。盘面与简要结论页面上就有，不用等。</p>' +
-          '<div style="margin:10px 0 0">' +
-            '<span class="pill">命理 → 回复「报告」</span>' +
-            '<span class="pill">占卜 → 回复「占卦」</span>' +
-            '<span class="pill">中医 → 回复「调理」</span>' +
-          '</div>' +
-          wxBlock('报告') +
-        '</div>' +
-      '</section>' +
-
-      '<section class="sect">' +
-        '<div class="sect-h"><span class="num">03</span><h2>常见问题<small>先问清楚，再决定</small></h2></div>' +
-        '<div class="faq">' +
-          '<details><summary>盘面和判断准不准？</summary><p>排盘按固定历法与规则推算，同一时间输入永远出同一张盘；判断给的是倾向和概率，不是命令。它帮你看清结构，不替你做决定。</p></details>' +
-          '<details><summary>要收费吗？</summary><p>体验免费，出盘、起卦、自查都不收费，盘面与简要结论直接看。完整报告加微信 ' + esc(WX.id) + ' 单独说，按你的事一项一项讲清楚。</p></details>' +
-          '<details><summary>我的出生时间、症状会被收集吗？</summary><p>不会。所有推算在你自己的浏览器里完成，页面不往服务器发任何输入。只有你主动发到微信，我才看得到。</p></details>' +
-          '<details><summary>为什么这三样要一起看？</summary><p>命理看你这辈子大致拿了什么牌，占卜看这一把该怎么出，中医看你现在的身体接不接得住。三者共用一套阴阳五行的语言，能对着看。</p></details>' +
-          '<details><summary>中医内容能替代看医生吗？</summary><p>不能。本站只做辨证自查和调理思路，急症、持续加重、正在服药的，先去医院面诊。</p></details>' +
-        '</div>' +
-      '</section>' +
-
       '<footer class="foot">' +
         '一恒体系 · 命理 / 占卜 / 中医调理 © 2026<br>' +
-        '所有排盘与判断均在浏览器本地完成，不收集、不上传你的输入。' +
-        '<br>命理与占卜为传统文化体验，请勿作为重大决策的唯一依据；中医内容仅供健康参考，不替代面诊与治疗。' +
+        '所有推算都在你的浏览器里完成，不收集、不上传 · 命理占卜为传统文化体验，中医内容仅供健康参考，不替代面诊。' +
       '</footer>';
   }
 
@@ -358,7 +302,7 @@
     var md = document.querySelector('meta[name="description"]');
     if (md) md.setAttribute('content', id ? META[id] : HOME_DESC);
     if (!id) {
-      $view.innerHTML = '<div class="page">' + homeHTML() + '</div>';
+      $view.innerHTML = '<div class="page home">' + homeHTML() + '</div>';
       idlePrefetch();
       return;
     }

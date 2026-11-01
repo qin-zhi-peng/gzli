@@ -40,6 +40,8 @@ ASSETS = [
     ("data.js", "javascript"),
     ("report.js", "javascript"),
     ("qr.png", "image"),
+    ("avatar-320.webp", "webp"),
+    ("avatar-320.png", "image"),
     ("favicon.png", "image"),
     ("apple-touch-icon.png", "image"),
     ("icon-192.png", "image"),
@@ -79,6 +81,8 @@ def ctype_ok(kind, ct):
     ct = (ct or "").lower()
     if kind == "image":
         return "image" in ct
+    if kind == "webp":
+        return "webp" in ct or "octet-stream" in ct
     if kind == "javascript":
         return "javascript" in ct or "text/plain" in ct
     if kind == "manifest":
@@ -148,6 +152,19 @@ def local_checks():
     check("app.js 有微信联系卡", "YH.contact" in app)
     check("页面上不生成完整内容", "YH.gate" not in app and "CODE_HASH" not in app)
     check("LICENSE 声明著作权", "保留所有权利" in files.get("LICENSE", b"").decode("utf-8", "ignore"))
+
+    # 首页形态（2026-11-01 用户定：上面换成头像、去掉大段介绍与 FAQ，微信引导只放在板块报告底部）
+    css = files.get("theme.css", b"").decode("utf-8", "ignore")
+    check("导航用官方头像", "avatar-320.webp" in html and 'class="av"' in html)
+    check("首页头像用官方头像", 'class="avatar"' in app and "avatar-320.webp" in app)
+    check("头像摆正不倾斜", "rotate(-3deg)" not in css and "rotate(-3deg)" not in app)
+    check("首页只留三个入口（无长介绍/FAQ/微信块）",
+          '"sect"' not in app and '"faq"' not in app and '"trust"' not in app
+          and '"lead"' not in app and '"sealbig"' not in app)
+    for name, kw in (("mingli.js", "报告"), ("zhanbu.js", "占卦"), ("zhongyi.js", "调理")):
+        src = files.get(name, b"").decode("utf-8", "ignore")
+        check(name + " 报告底部引导微信（回复「%s」）" % kw,
+              "wxKeyword" in src and kw in src)
 
     # manifest（PWA）
     try:
@@ -245,6 +262,8 @@ def live_checks(base):
         check("线上 app.js 含微信联系卡", "YH.contact" in js_app)
         check("线上页不生成完整内容", "YH.gate" not in js_app)
         check("线上 app.js 含微信号", WECHAT in js_app)
+        check("线上首页头像用官方头像", "avatar-320.webp" in js_app and "avatar-320.webp" in text)
+        check("线上首页无长介绍/FAQ", '"sect"' not in js_app and '"faq"' not in js_app)
         for name, marker in (("mingli.js", "boards.mingli"), ("zhanbu.js", "boards.zhanbu"),
                              ("zhongyi.js", "boards.zhongyi")):
             src = fetch(base + name, UA_WECHAT)[2].decode("utf-8", "ignore")

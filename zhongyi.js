@@ -14,7 +14,10 @@
   var ORDER = {};
   SYMPTOMS.forEach(function (s, i) { BY_ID[s.id] = s; ORDER[s.id] = i; });
 
-  var WX_ID = (root.YH && (root.YH.wx || root.YH.WX)) || 'xy1618fff';
+  /* 注意：app.js 里 YH.WX 是对象（{id,qr,keywords}），必须取 .id，
+     否则会渲染成「加微信 [object Object]」（2026-11-01 修）。 */
+  var _yh = root.YH || {};
+  var WX_ID = (typeof _yh.wx === 'string' && _yh.wx) || (_yh.WX && _yh.WX.id) || 'xy1618fff';
   var REP_FOOT = '本页依据症状倾向生成，仅供健康参考，不替代面诊与诊断；具体方药与剂量须由执业医师面诊后决定。';
 
   /* ---------------- 基础工具 ---------------- */

@@ -26,6 +26,9 @@
 | `index.html` | 壳：顶栏、挂载点、脚本顺序（板块模块在前，`app.js` 最后） |
 | `theme.css` | 玄金主题 tokens + 总领首页 + 通用组件 |
 | `app.js` | hash 路由、总领首页、`YH` 工具（esc / h2 / toast / copy / contact） |
+| `avatar-320.webp` | 首页/顶栏头像：官方红金圆环头像切圆、透明底、摆正（页面实载，33KB） |
+| `avatar-320.png` | 同上 PNG 母版（出分享图 / 兜底用） |
+| `og.png` | 分享大图 1200×630（右侧头像 + 板块名） |
 | `mingli.js` `mingli.css` | 命理板 |
 | `zhanbu.js` `zhanbu-data.js` `zhanbu.css` | 占卜板（排盘引擎：起卦 → 装卦 → 四柱旬空） |
 | `zhongyi.js` `zhongyi-data.js` `zhongyi.css` | 中医板（症状指纹 → 证型权重 → 调护方向） |
@@ -33,6 +36,13 @@
 | `qr.png` | 一恒微信个人二维码 |
 | `LICENSE` | 自定义授权：著作权所有，禁止商用、抓取、二次分发 |
 | `tools/verify-site.py` | 上线自检（本地文件 + 线上资源 + 三板块注册 + 明文检查） |
+
+## 首页形态（2026-11-01 用户定）
+
+- 顶部只放**官方头像 + 一恒体系字标**，不做印章、不做倾斜（头像摆正）。
+- 不放大段介绍、不放开场文案、不放「本地推算/不上传」标签条、不放常见问题。
+- 只留三个入口卡：图标 + 板块名 + 一句话。
+- **微信引导只在各板块的详细报告底部出现**（命理摘要下 / 起卦后卦盘下 / 辨证结果下）。
 
 ## 口径与边界
 
@@ -49,6 +59,10 @@ python -m http.server 8850            # 打开 http://127.0.0.1:8850/
 python tools\verify-site.py --local   # 本地自检
 python tools\verify-site.py           # 线上自检（发布后跑）
 python D:\dsh\scripts\check-public-content.py   # 发布前：公开内容红线扫描（仓外脚本）
+
+# 换头像 / 重出分享图（源图在 D:\一恒个人事业\30_品牌视觉\品牌标识\头像-官方-红金圆环.jpg）
+python ..\tools\make-avatar.py              # 头像切圆 → avatar-320.png + webp
+python ..\tools\make-social-assets.py og    # 分享图（用新头像）
 ```
 
 发布：`docs\duowei\tools\deploy.ps1` —— 本地自检 → commit → push（带重试）→ 回读远端确认
