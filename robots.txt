@@ -1,0 +1,6 @@
+# 一恒体系 · 命理 / 占卜 / 中医调理
+# 全站公开，欢迎抓取。页面走 hash 路由，入口只收录首页。
+User-agent: *
+Allow: /
+
+Sitemap: https://qin-zhi-peng.github.io/gzli/sitemap.xml

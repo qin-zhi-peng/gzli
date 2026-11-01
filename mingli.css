@@ -1,0 +1,51 @@
+/* 一恒体系 · 命理板块样式（只放命理专属组件，通用样式在 theme.css） */
+
+/* 四柱大字 */
+.pillars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:10px 0 0}
+.pil{background:#12100c;border:1px solid var(--line);border-radius:13px;padding:11px 4px;text-align:center}
+.pil .t{font-size:11px;color:var(--dim);letter-spacing:2px}
+.pil .g{font-size:22px;font-weight:700;color:var(--gold2);letter-spacing:1px;line-height:1.28;white-space:nowrap}
+.pil .s{font-size:11.5px;color:var(--gold);margin-top:3px}
+.pil.day{border-color:var(--line2);background:linear-gradient(180deg,#1e1710,#14100b)}
+
+/* 四柱表 */
+.four-table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+.four-table th{color:#8a7d68;font-weight:400;text-align:left;padding:6px 4px}
+.four-table th+th{color:var(--gold2);font-weight:600}
+
+/* 天体图 */
+.sky{background:linear-gradient(180deg,#14100b,#100d0a);border:1px solid var(--line);border-radius:16px;padding:6px 4px 2px}
+.sky svg{width:100%;height:auto;display:block}
+.sky3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:4px 8px 10px}
+.sky3 div{text-align:center;font-size:12px;color:var(--dim);line-height:1.45;min-width:0;word-break:break-word}
+.sky3 b{display:block;font-size:14px;color:var(--gold2)}
+.sky3 .m{color:var(--text);font-size:12.5px}
+
+/* 紫微盘 */
+.pal{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(84px,auto);gap:5px;margin-top:10px}
+.pc{background:#12100c;border:1px solid var(--line);border-radius:10px;padding:5px;font-size:10.5px;line-height:1.4;overflow:hidden;min-width:0;word-break:break-all}
+.pc .pb{color:#8a7d68;font-size:10px}
+.pc .pn{color:var(--text);font-size:11.5px;font-weight:600}
+.pc .ps{color:#cfc6b6;font-size:10.5px;margin-top:2px;word-break:break-all}
+.pc.life{border-color:var(--gold);background:#1b1409}
+.pc .mut{color:var(--red2);font-weight:700}
+.mid{grid-row:2/4;grid-column:2/4;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#1c150e,#120f0b);border:1px solid #3a2f1e;border-radius:12px;padding:6px;text-align:center}
+.mid .y{font-size:19px;color:var(--gold2);letter-spacing:2px}
+.mid .d{font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.5}
+@media (min-width:560px){.pal{grid-auto-rows:minmax(96px,auto)}}
+
+/* 大限 */
+.dx{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.dxi{background:#12100c;border:1px solid var(--line);border-radius:12px;padding:9px 10px}
+.dxh{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--dim);gap:8px}
+.dxh b{color:var(--gold2);font-size:13px;white-space:nowrap}
+.strip{position:relative;height:16px;margin:7px 0 3px;border-radius:8px;background:#1c1710;overflow:hidden}
+.strip .sun{position:absolute;top:4px;width:8px;height:8px;border-radius:50%;background:var(--gold2);transform:translateX(-4px)}
+.strip .jup{position:absolute;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid var(--gold);background:rgba(216,180,106,.25);transform:translateX(-6px)}
+.dxs{font-size:11.5px;color:var(--dim)}
+.dxs b{color:var(--ok);font-weight:500}
+
+/* 免费关键词 */
+.freekey{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.freekey span{background:#1e1710;border:1px solid var(--line2);color:var(--gold2);border-radius:999px;padding:3px 11px;font-size:12.5px}

@@ -1,0 +1,15 @@
+{
+  "name": "一恒体系 · 命理 占卜 中医调理",
+  "short_name": "一恒体系",
+  "description": "命理看结构，占卜看当下，中医看身体。全部在浏览器本地推算。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0b09",
+  "theme_color": "#0d0b09",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

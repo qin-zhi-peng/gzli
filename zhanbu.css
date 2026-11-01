@@ -1,0 +1,426 @@
+/* ============================================================================
+ * 一恒体系 · 占卜 · 象数六爻（板块局部样式）
+ * 约定：所有自定义 class 一律 zb- 前缀；颜色只用主题变量；
+ *       移动优先（390px 宽不横向滚动）；不引外链字体/图片/库。
+ * ========================================================================== */
+
+/* ---------------------------------------------------------------- 容器 */
+.zb-wrap {
+  max-width: 100%;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.zb-wrap *,
+.zb-wrap *::before,
+.zb-wrap *::after { box-sizing: border-box; }
+
+.zb-card { padding: 13px 13px 12px; }
+
+/* ---------------------------------------------------------------- 输入 */
+.zb-field { margin-bottom: 10px; }
+.zb-field:last-of-type { margin-bottom: 4px; }
+.zb-lab {
+  display: block;
+  font-size: 12px;
+  color: var(--dim);
+  margin: 0 0 5px 2px;
+  letter-spacing: .5px;
+}
+.zb-q,
+.zb-sel {
+  width: 100%;
+  display: block;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 11px;
+  font-size: 15px;
+  line-height: 1.3;
+  font-family: inherit;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.zb-q::placeholder { color: var(--dim2); font-size: 13px; }
+.zb-q:focus,
+.zb-sel:focus { border-color: var(--gold); }
+.zb-sel {
+  background-image: linear-gradient(45deg, transparent 50%, var(--gold) 50%),
+    linear-gradient(135deg, var(--gold) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 18px, calc(100% - 11px) 18px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 32px;
+}
+
+.zb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.zb-actions .btn,
+.zb-actions .btn-ghost {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: 11px 8px;
+  font-size: 14.5px;
+  border-radius: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.zb-actions-2 { margin-top: 12px; }
+.zb-actions .zb-btn-main { background: linear-gradient(180deg, var(--gold), #b8913f); color: #1a1409; border: 1px solid var(--gold2); font-weight: 600; }
+.zb-actions .zb-btn-alt { background: var(--panel2); color: var(--gold2); border: 1px solid var(--line2); }
+.zb-actions .btn:disabled,
+.zb-actions .btn-ghost:disabled { opacity: .55; cursor: default; }
+
+.zb-hint-line {
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--dim2);
+  line-height: 1.65;
+}
+
+/* ---------------------------------------------------------------- 铜钱动效 */
+.zb-toss {
+  margin-top: 12px;
+  padding: 8px 9px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.zb-toss.on { animation: zb-fade .2s ease-out; }
+@keyframes zb-fade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+
+.zb-trow {
+  display: grid;
+  grid-template-columns: 26px 1fr 60px 12px;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  border-bottom: 1px dashed var(--line);
+  opacity: .42;
+  transition: opacity .12s linear;
+}
+.zb-trow:last-child { border-bottom: 0; }
+.zb-trow.done { opacity: 1; }
+.zb-trow.cur { opacity: 1; background: rgba(216, 180, 106, .06); border-radius: 8px; }
+.zb-tpos { font-size: 10.5px; color: var(--dim); }
+.zb-tcoins { display: flex; gap: 5px; }
+.zb-coin {
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  text-align: center;
+  font-size: 11px;
+  border-radius: 50%;
+  border: 1px solid var(--line2);
+  color: var(--dim);
+  background: var(--panel);
+}
+.zb-coin.yang { border-color: var(--gold); color: var(--gold2); background: rgba(216, 180, 106, .13); }
+.zb-coin.yin { border-color: var(--line2); color: var(--dim); background: var(--panel); }
+.zb-coin.ph { border-style: dashed; color: var(--dim2); }
+.zb-trow.cur .zb-coin { animation: zb-flip .12s linear; }
+@keyframes zb-flip {
+  0% { transform: rotateY(0deg) scale(1); }
+  50% { transform: rotateY(80deg) scale(.92); }
+  100% { transform: rotateY(0deg) scale(1); }
+}
+.zb-tval { font-size: 11.5px; color: var(--gold2); text-align: right; white-space: nowrap; }
+.zb-tsym { font-size: 12px; color: var(--red2); text-align: center; }
+
+/* ---------------------------------------------------------------- 手动指定 */
+.zb-mhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.zb-mt { font-size: 13.5px; color: var(--gold2); font-weight: 600; }
+.zb-reset { width: auto; margin: 0; font-size: 11.5px; padding: 4px 10px; }
+.zb-mrow {
+  display: grid;
+  grid-template-columns: 26px 1fr 42px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.zb-mrow:last-child { border-bottom: 0; }
+.zb-mpos { font-size: 10.5px; color: var(--dim); }
+.zb-mseg { display: flex; gap: 3px; min-width: 0; }
+.zb-mopt {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 5px 0;
+  font-size: 11.5px;
+  line-height: 1.2;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--dim);
+  cursor: pointer;
+  font-family: inherit;
+}
+.zb-mopt.on {
+  border-color: var(--gold);
+  color: var(--gold2);
+  background: rgba(216, 180, 106, .14);
+  font-weight: 600;
+}
+.zb-mbar { display: flex; gap: 4px; align-items: center; justify-content: center; height: 12px; }
+.zb-b1 {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold2), var(--gold));
+}
+.zb-b0 {
+  display: block;
+  width: calc(50% - 2px);
+  height: 6px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold2), var(--gold));
+}
+
+/* ---------------------------------------------------------------- 卦盘 */
+.zb-out { margin-top: 4px; }
+.zb-board {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 11px 9px;
+  margin: 2px 0 4px;
+  overflow: hidden;
+}
+
+.zb-bhead { padding: 0 2px 9px; border-bottom: 1px solid var(--line2); }
+.zb-hrow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.zb-hname {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--gold2);
+  letter-spacing: 1px;
+  line-height: 1.25;
+}
+.zb-hname2 { font-size: 14px; color: var(--text); }
+.zb-arrow { color: var(--dim2); font-size: 12px; }
+.zb-tag {
+  font-size: 11px;
+  color: var(--gold);
+  border: 1px solid var(--line2);
+  background: var(--panel2);
+  border-radius: 999px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+.zb-tag-nat { color: var(--gold2); border-color: var(--gold); }
+.zb-mrow2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--dim);
+  min-width: 0;
+}
+.zb-gz { color: var(--text); letter-spacing: .3px; }
+.zb-void { color: var(--red2); }
+.zb-qtime { color: var(--dim2); }
+.zb-kq {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--dim);
+  overflow-wrap: anywhere;
+}
+
+.zb-rows { margin-top: 6px; }
+.zb-legend {
+  display: grid;
+  grid-template-columns: 20px 40px 46px minmax(0, 1fr) 20px 46px;
+  gap: 4px;
+  padding: 0 2px 4px;
+  font-size: 9.5px;
+  color: var(--dim2);
+  text-align: center;
+  letter-spacing: .5px;
+}
+.zb-legend span { white-space: nowrap; }
+.zb-legend span:nth-child(3) { text-align: left; }
+.zb-legend span:nth-child(2) { text-align: left; }
+
+.zb-row {
+  display: grid;
+  grid-template-columns: 20px 40px 46px minmax(0, 1fr) 20px 46px;
+  gap: 4px;
+  align-items: center;
+  padding: 5px 2px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+.zb-row:last-child { border-bottom: 0; }
+.zb-row.mov { background: rgba(216, 180, 106, .05); }
+.zb-row.yong {
+  background: rgba(216, 180, 106, .1);
+  box-shadow: inset 2px 0 0 var(--gold);
+}
+
+.zb-spirit { font-size: 10px; color: var(--dim); text-align: center; letter-spacing: -.5px; }
+.zb-fus,
+.zb-main,
+.zb-bian { display: block; min-width: 0; }
+.zb-f1 {
+  display: block;
+  font-size: 11.5px;
+  line-height: 1.25;
+  color: var(--text);
+  font-style: normal;
+  white-space: nowrap;
+}
+.zb-f2 {
+  display: block;
+  font-size: 9.5px;
+  line-height: 1.25;
+  color: var(--dim);
+  font-style: normal;
+  white-space: nowrap;
+}
+.zb-fus .zb-f1 { color: var(--dim); font-size: 10.5px; }
+.zb-fus .zb-f2 { color: var(--dim2); }
+.zb-fus.miss .zb-f1 { color: var(--red2); font-weight: 700; }
+.zb-bian .zb-f1 { color: var(--gold2); font-size: 10.5px; }
+.zb-dim { color: var(--dim2); }
+
+.zb-sym {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.zb-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.zb-bar {
+  display: block;
+  height: 7px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold2), var(--gold));
+  flex: 0 0 auto;
+}
+.zb-bar.full { width: 100%; }
+.zb-bar.half { width: calc(50% - 3px); }
+.zb-row.mov .zb-bar { background: linear-gradient(90deg, var(--red2), var(--red)); }
+.zb-mk {
+  flex: 0 0 11px;
+  font-size: 12px;
+  font-style: normal;
+  color: var(--red2);
+  text-align: center;
+  line-height: 1;
+}
+
+.zb-role {
+  font-size: 10.5px;
+  text-align: center;
+  color: transparent;
+}
+.zb-role.shi { color: var(--gold2); font-weight: 700; }
+.zb-role.ying { color: var(--dim); font-weight: 600; }
+
+.zb-tips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 8px 2px 0;
+  margin-top: 4px;
+  border-top: 1px solid var(--line2);
+  font-size: 10px;
+  color: var(--dim2);
+}
+
+/* ---------------------------------------------------------------- 免费浅断 */
+.zb-brief {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 13px;
+}
+.zb-bl { margin: 0; padding: 0 0 0 16px; }
+.zb-bl li {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--text);
+  margin: 0 0 7px;
+  overflow-wrap: anywhere;
+}
+.zb-bl li::marker { color: var(--gold); }
+.zb-bl li:last-child { margin-bottom: 0; }
+
+.zb-verdict {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 11px;
+  padding: 10px 11px;
+  border-radius: 11px;
+  border: 1px solid var(--line2);
+  background: var(--panel2);
+}
+.zb-vk {
+  flex: 0 0 auto;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold2);
+  letter-spacing: 1px;
+  padding-top: 1px;
+}
+.zb-vt { font-size: 12.5px; line-height: 1.7; color: var(--text); }
+.zb-verdict.v4,
+.zb-verdict.v3 { border-color: var(--gold); background: rgba(216, 180, 106, .09); }
+.zb-verdict.v2 { border-color: var(--line2); }
+.zb-verdict.v1 { border-color: var(--red); }
+.zb-verdict.v1 .zb-vk { color: var(--red2); }
+.zb-verdict.v0 { border-color: var(--red2); background: rgba(192, 57, 43, .1); }
+.zb-verdict.v0 .zb-vk { color: var(--red2); }
+
+/* ---------------------------------------------------------------- 门槛卡 / 报告 */
+/* 门槛卡本体与报告段落用 theme.css 的 .lock / .repsec，这里只做占卜板块的必要微调，
+   保证与命理、中医两个板块的观感一致（不另造一套卡片外观）。 */
+.zb-gate { margin-top: 4px; }
+.zb-lock { margin: 12px 0; }
+
+.zb-rep p,
+.zb-rep li { overflow-wrap: anywhere; }
+.zb-rep li { margin-bottom: 6px; }
+.zb-rep b { color: var(--gold2); font-weight: 600; }
+
+/* ---------------------------------------------------------------- 窄屏微调 */
+@media (max-width: 359px) {
+  .zb-row,
+  .zb-legend { grid-template-columns: 18px 34px 42px minmax(0, 1fr) 14px 40px; gap: 3px; }
+  .zb-f1 { font-size: 11px; }
+  .zb-mopt { font-size: 11px; }
+}
+@media (min-width: 560px) {
+  .zb-row,
+  .zb-legend { grid-template-columns: 26px 54px 60px minmax(0, 1fr) 20px 60px; gap: 6px; }
+  .zb-f1 { font-size: 12.5px; }
+  .zb-f2 { font-size: 10.5px; }
+  .zb-bar { height: 8px; }
+  .zb-hname { font-size: 21px; }
+}
