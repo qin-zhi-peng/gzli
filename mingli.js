@@ -7,6 +7,8 @@
 
   var ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
   var names = ['年柱', '月柱', '日柱', '时柱'];
+  var STEM_WX = { '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土', '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水' };
+  var BRANCH_WX = { '子': '水', '丑': '土', '寅': '木', '卯': '木', '辰': '土', '巳': '火', '午': '火', '未': '土', '申': '金', '酉': '金', '戌': '土', '亥': '水' };
 
   function mount(rootEl) {
     var YH = root.YH;   /* app.js 最后加载，只能在运行时取 */
@@ -32,8 +34,10 @@
           '<select id="mlGender" style="flex:0 0 86px" aria-label="性别"><option>男</option><option>女</option></select>' +
         '</div>' +
         '<button class="btn" id="mlRun">排 盘</button>' +
+        '<div class="ml-dirty" id="mlDirty">参数已改，点『排盘』更新</div>' +
         '<div class="hint" style="margin:8px 0 0">默认是示例生日（2000-03-15 辰时）——改成你自己的出生时间再点排盘。<br>年柱＝岁序（360 日一岁）· 月柱＝平气月 · 日柱＝连续干支 · 时柱＝时辰。</div>' +
       '</div>' +
+      '<div class="ml-empty" id="mlEmpty">填好出生时间与性别，点『排盘』查看四柱、紫微与十年大运。</div>' +
       '<div id="mlPillars"></div>' +
       '<div id="mlSky"></div>' +
       '<div id="mlFour"></div>' +
@@ -44,13 +48,28 @@
     var $d = rootEl.querySelector('#mlDate');
     var $h = rootEl.querySelector('#mlHour');
     var $g = rootEl.querySelector('#mlGender');
+    var $empty = rootEl.querySelector('#mlEmpty');
+    var $dirty = rootEl.querySelector('#mlDirty');
     var last = null;
+    var ran = false;
 
-    function maybeRun() {
+    function clearPanels() {
+      ['#mlPillars', '#mlSky', '#mlFour', '#mlPal', '#mlDx', '#mlReport'].forEach(function (s) {
+        rootEl.querySelector(s).innerHTML = '';
+      });
+    }
+
+    function markDirty() {
+      if (ran) $dirty.className = 'ml-dirty on';
+    }
+
+    function run() {
+      $dirty.className = 'ml-dirty';
       var y = parseInt(($d.value || '').slice(0, 4), 10);
       if (!y || y < 1900 || y > 2100) {
+        $empty.hidden = true;
+        clearPanels();
         rootEl.querySelector('#mlPillars').innerHTML = '<div class="card"><b style="color:var(--red2)">日期超出范围</b><div class="hint">本页数据包覆盖 1900–2100 年，请把出生日期改到这个区间。</div></div>';
-        ['#mlSky', '#mlFour', '#mlPal', '#mlDx', '#mlReport'].forEach(function (s) { rootEl.querySelector(s).innerHTML = ''; });
         return;
       }
       try {
@@ -63,7 +82,11 @@
         renderPalaces(r);
         renderDaxian(r);
         renderReport(r);
+        $empty.hidden = true;
+        ran = true;
       } catch (e) {
+        $empty.hidden = true;
+        clearPanels();
         rootEl.querySelector('#mlPillars').innerHTML = '<div class="card"><b style="color:var(--red2)">排盘失败</b><div class="hint">' +
           YH.esc(e && e.message ? e.message : e) + '（日期支持 1900–2100）</div></div>';
       }
@@ -75,8 +98,7 @@
       r.pillars.forEach(function (p, i) {
         html += '<div class="pil' + (i === 2 ? ' day' : '') + '">' +
           '<div class="t">' + names[i] + '</div>' +
-          '<div class="g">' + p + '</div>' +
-          '<div class="s">' + (r.gods[i] || '') + '</div></div>';
+          '<div class="g">' + p + '</div></div>';
       });
       html += '</div><div class="sub">农历 ' + r.lunar.month + '月' + r.lunar.day + '日 · 岁序 ' + r.year + ' · 平气月 ' + r.month + '</div>';
       rootEl.querySelector('#mlPillars').innerHTML = html;
@@ -119,11 +141,15 @@
     }
 
     function renderFour(r) {
-      var rows = [['十神'].concat(r.gods), ['干支'].concat(r.pillars)];
+      var gans = r.pillars.map(function (p) { return p.charAt(0); });
+      var zhis = r.pillars.map(function (p) { return p.charAt(1); });
+      var wxs = r.pillars.map(function (p) { return STEM_WX[p.charAt(0)] + BRANCH_WX[p.charAt(1)]; });
+      var rows = [['天干'].concat(gans), ['地支'].concat(zhis), ['五行'].concat(wxs)];
       var body = rows.map(function (row, i) {
         return '<tr>' + row.map(function (c, j) {
-          if (i === 0 && j > 0) return '<td style="padding:6px 4px;color:var(--gold);font-size:12.5px">' + c + '</td>';
-          return '<td style="padding:6px 4px;' + (j === 0 ? 'color:#8a7d68;font-size:12.5px' : 'color:var(--text);font-size:15px;font-weight:600') + '">' + c + '</td>';
+          if (j === 0) return '<td style="padding:6px 4px;color:#8a7d68;font-size:12.5px">' + c + '</td>';
+          if (i === 2) return '<td style="padding:6px 4px;color:var(--gold);font-size:13.5px;letter-spacing:2px">' + c + '</td>';
+          return '<td style="padding:6px 4px;color:var(--text);font-size:15px;font-weight:600;letter-spacing:1px">' + c + '</td>';
         }).join('') + '</tr>';
       }).join('');
       rootEl.querySelector('#mlFour').innerHTML = '<h2 class="h2"><span class="n">3</span>四柱排盘</h2>' +
@@ -156,16 +182,42 @@
         '<div class="pal">' + html + '</div>';
     }
 
+    function pad2(n) { return (n < 10 ? '0' : '') + n; }
+    function dateText(o) { return o.year + '-' + pad2(o.month) + '-' + pad2(o.day); }
+    function dateNum(o) { return o.year * 10000 + o.month * 100 + o.day; }
+    function todayNum() {
+      var d = new Date();
+      return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    }
+    function skyPos(o) { return (o.lon / 360 * 100).toFixed(1) + '%'; }
+    function skyLine(label, o) {
+      return label + ' <b>' + o.sign + ' ' + Math.floor(o.lon) + '°（' + o.m.name + '）</b>';
+    }
+
     function renderDaxian(r) {
-      var html = r.ziwei.ranges.map(function (x) {
-        var s = x.sky, sunPct = (s.sun.lon / 360 * 100).toFixed(1), jupPct = (s.jupiter.lon / 360 * 100).toFixed(1);
-        return '<div class="dxi"><div class="dxh"><span>' + x.r[0] + '~' + x.r[1] + ' 岁 · ' + x.b + '宫</span><b>' + x.dateText + ' 起</b></div>' +
-          '<div class="strip"><span class="sun" style="left:' + sunPct + '%"></span><span class="jup" style="left:' + jupPct + '%"></span></div>' +
-          '<div class="dxs">太阳在 <b>' + s.sun.m.name + '</b>（' + s.sun.lon.toFixed(0) + '°） · 木星在 <b>' + s.jupiter.m.name + '</b>（' + s.jupiter.lon.toFixed(0) + '°）' +
-          (s.jupiter.retro ? ' · 逆行中' : '') + '</div></div>';
+      var list = r.dayun || [];
+      var today = todayNum();
+      var html = list.map(function (x, i) {
+        var cur = today >= dateNum(x.start) && today <= dateNum(x.end);
+        var s = x.sky;
+        return '<div class="dxi' + (cur ? ' current' : '') + '">' +
+          '<div class="dxh">' +
+            '<span class="dxl"><b>第 ' + (i + 1) + ' 运 · ' + x.pillar + '</b><i>' + x.startAge + '~' + x.endAge + ' 岁</i>' +
+              (cur ? '<em class="dxtag">当前</em>' : '') + '</span>' +
+            '<span class="dxr">' + dateText(x.start) + ' ~ ' + dateText(x.end) + '</span>' +
+          '</div>' +
+          '<div class="strip">' +
+            '<span class="sun" style="left:' + skyPos(s.sun) + '"></span>' +
+            '<span class="moon" style="left:' + skyPos(s.moon) + '"></span>' +
+            '<span class="jup" style="left:' + skyPos(s.jupiter) + '"></span>' +
+          '</div>' +
+          '<div class="dxs">' + skyLine('太阳', s.sun) + ' · ' + skyLine('月亮', s.moon) + ' · ' + skyLine('木星', s.jupiter) + '</div>' +
+        '</div>';
       }).join('');
-      rootEl.querySelector('#mlDx').innerHTML = '<h2 class="h2"><span class="n">5</span>每一段大限，天上在哪</h2>' +
-        '<div class="hint">大限每 10 年一段（3600 天）。每段开头时太阳与木星在黄道的位置——木星 12 年绕天一圈，正好对应十二地支。</div>' +
+      var startAge = list.length ? list[0].startAge : 0;
+      rootEl.querySelector('#mlDx').innerHTML = '<h2 class="h2"><span class="n">5</span>十年大限 · 四柱大运</h2>' +
+        '<div class="hint">按新修四柱起运（本盘 ' + startAge + ' 岁起运），每运 3600 天；每运开头时太阳、月亮、木星在黄道的位置。</div>' +
+        '<div class="dx-legend"><span><i class="lgsun"></i>太阳</span><span><i class="lgmoon"></i>月亮</span><span><i class="lgjup"></i>木星</span></div>' +
         '<div class="dx">' + html + '</div>';
     }
 
@@ -176,7 +228,10 @@
       var html = '<h2 class="h2"><span class="n">6</span>盘面与简要结论</h2>' +
         '<div class="card">' +
           '<div style="font-size:15px;color:var(--gold2);line-height:1.8">' + free.summary + '</div>' +
-          '<div class="freekey">' + free.keys.map(function (k) { return '<span>' + k + '</span>'; }).join('') + '</div>' +
+          '<div class="freekey">' + free.keys.map(function (k) {
+            var seg = k.split('·');
+            return '<span>' + (seg.length > 1 ? seg.slice(1).join('·') : k) + '</span>';
+          }).join('') + '</div>' +
           '<div style="font-size:13px;color:#b9c8a8;margin-top:8px">⚠ 最该注意：' + free.caution + '</div>' +
         '</div>' +
         '<div id="mlCta"></div>';
@@ -186,7 +241,7 @@
       var hourText = ($h.options[$h.selectedIndex] || {}).text || '';
       hourText = hourText.split('（')[0].trim();
       var copyText = '一恒体系 · 命理\n出生：' + $d.value + ' ' + hourText + ' ' + $g.value +
-        '\n四柱：' + r.pillars.join(' ') + '（十神：' + r.gods.join(' / ') + '）' +
+        '\n四柱：' + r.pillars.join(' ') +
         '\n农历 ' + r.lunar.month + '月' + r.lunar.day + '日 · 岁序 ' + r.year + ' · 平气月 ' + r.month;
       var wxId = (YH.WX && YH.WX.id) || 'xy1618fff';
       var opts = {
@@ -204,11 +259,11 @@
       }
     }
 
-    rootEl.querySelector('#mlRun').addEventListener('click', maybeRun);
-    [rootEl.querySelector('#mlDate'), $h, $g].forEach(function (el) {
-      el.addEventListener('change', maybeRun);
+    rootEl.querySelector('#mlRun').addEventListener('click', run);
+    [$d, $h, $g].forEach(function (el) {
+      el.addEventListener('input', markDirty);
+      el.addEventListener('change', markDirty);
     });
-    maybeRun();
   }
 
   root.YH = root.YH || {};

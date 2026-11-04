@@ -2,11 +2,15 @@
 
 /* 四柱大字 */
 .pillars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:10px 0 0}
-.pil{background:#12100c;border:1px solid var(--line);border-radius:13px;padding:11px 4px;text-align:center}
+.pil{background:#12100c;border:1px solid var(--line);border-radius:13px;padding:12px 4px;text-align:center}
 .pil .t{font-size:11px;color:var(--dim);letter-spacing:2px}
-.pil .g{font-size:22px;font-weight:700;color:var(--gold2);letter-spacing:1px;line-height:1.28;white-space:nowrap}
-.pil .s{font-size:11.5px;color:var(--gold);margin-top:3px}
+.pil .g{font-size:25px;font-weight:700;color:var(--gold2);letter-spacing:1px;line-height:1.28;white-space:nowrap}
 .pil.day{border-color:var(--line2);background:linear-gradient(180deg,#1e1710,#14100b)}
+
+/* 空态 / 参数已改提示 */
+.ml-empty{margin:14px 0;padding:22px 16px;border:1px dashed var(--line2);border-radius:16px;background:rgba(18,16,12,.55);color:var(--dim);font-size:13px;line-height:1.8;text-align:center;letter-spacing:.02em}
+.ml-dirty{display:none;margin-top:8px;font-size:11.5px;color:var(--dim2);text-align:center;letter-spacing:.02em}
+.ml-dirty.on{display:block}
 
 /* 四柱表 */
 .four-table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
@@ -35,16 +39,28 @@
 .mid .d{font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.5}
 @media (min-width:560px){.pal{grid-auto-rows:minmax(96px,auto)}}
 
-/* 大限 */
+/* 大限 · 四柱大运 */
 .dx{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .dxi{background:#12100c;border:1px solid var(--line);border-radius:12px;padding:9px 10px}
-.dxh{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--dim);gap:8px}
-.dxh b{color:var(--gold2);font-size:13px;white-space:nowrap}
+.dxi.current{border-color:var(--gold);box-shadow:0 0 0 1px rgba(216,180,106,.16),0 8px 20px -16px #000}
+.dxh{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;font-size:12.5px;color:var(--dim);min-width:0}
+.dxl{min-width:0}
+.dxl b{color:var(--gold2);font-size:13px;white-space:nowrap}
+.dxl i{font-style:normal;color:var(--dim);font-size:11.5px;margin-left:7px;white-space:nowrap}
+.dxr{color:var(--dim2);font-size:11px;white-space:nowrap;flex:0 0 auto}
+.dxtag{display:inline-block;font-style:normal;font-size:10px;line-height:1.5;color:#1a1409;background:var(--gold);border-radius:999px;padding:0 6px;margin-left:6px;white-space:nowrap;vertical-align:1px}
 .strip{position:relative;height:16px;margin:7px 0 3px;border-radius:8px;background:#1c1710;overflow:hidden}
 .strip .sun{position:absolute;top:4px;width:8px;height:8px;border-radius:50%;background:var(--gold2);transform:translateX(-4px)}
+.strip .moon{position:absolute;top:5px;width:6px;height:6px;border-radius:50%;background:#cfd9e6;transform:translateX(-3px)}
 .strip .jup{position:absolute;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid var(--gold);background:rgba(216,180,106,.25);transform:translateX(-6px)}
-.dxs{font-size:11.5px;color:var(--dim)}
+.dxs{font-size:11.5px;color:var(--dim);line-height:1.75}
 .dxs b{color:var(--ok);font-weight:500}
+.dx-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:var(--dim2);margin:0 0 8px 2px;line-height:1.4}
+.dx-legend span{display:inline-flex;align-items:center;gap:5px}
+.dx-legend i{display:inline-block;border-radius:50%}
+.dx-legend .lgsun{width:8px;height:8px;background:var(--gold2)}
+.dx-legend .lgmoon{width:6px;height:6px;background:#cfd9e6}
+.dx-legend .lgjup{width:10px;height:10px;border:2px solid var(--gold);background:rgba(216,180,106,.25)}
 
 /* 免费关键词 */
 .freekey{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}

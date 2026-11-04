@@ -540,8 +540,9 @@
     /* 输入卡 */
     html.push('<section class="card zb-card" id="zbInCard">');
     html.push('<div class="zb-field">');
-    html.push('<label class="zb-lab" for="zbQ">心里默问的一件事</label>');
-    html.push('<input id="zbQ" class="zb-q" type="text" maxlength="60" autocomplete="off" placeholder="可不填。写一句最想问的，例如：这次合作能不能谈成">');
+    html.push('<label class="zb-lab" for="zbQ">心里默问的一件事 <em class="zb-req">必填</em></label>');
+    html.push('<input id="zbQ" class="zb-q" type="text" maxlength="80" autocomplete="off" placeholder="例如：35岁男李某某在北京，想问自己的感情未来发展趋势（写清性别、年龄、姓名、所在地）">');
+    html.push('<div class="zb-qhelp">请写清：性别 · 年龄 · 姓名 · 所在地 + 想问的事，起卦后不能改。</div>');
     html.push('</div>');
     html.push('<div class="zb-field">');
     html.push('<label class="zb-lab" for="zbTopic">问事类型</label>');
@@ -581,6 +582,19 @@
     var elManual = $('zbManual'), elMRows = $('zbMRows');
     var btnToss = $('zbTossBtn'), btnManual = $('zbManualBtn'), btnManualGo = $('zbManualGo');
     var btnReset = $('zbReset'), btnCancel = $('zbManualCancel');
+
+    /* 两个起卦入口共用的必填校验：不足 2 字一律拦住 */
+    function readQuestion() {
+      var q = (elQ.value || '').trim();
+      if (q.length < 2) {
+        toast('请先写下心里要问的事：性别、年龄、姓名、所在地 + 想问的事');
+        elQ.classList.add('err');
+        if (elQ.focus) elQ.focus();
+        return '';
+      }
+      elQ.classList.remove('err');
+      return q;
+    }
 
     /* ---- 手动指定渲染 ---- */
     function paintManual() {
@@ -643,6 +657,8 @@
 
     function doToss() {
       if (state.tossing) return;
+      var q = readQuestion();
+      if (!q) return;
       setBusy(true);
       elToss.hidden = false;
       elToss.classList.add('on');
@@ -660,7 +676,7 @@
           root.setTimeout(function () {
             setBusy(false);
             var states = done.map(function (d) { return d.name; });
-            cast(states);
+            cast(states, q);
           }, 200);
         }
       };
@@ -668,11 +684,11 @@
     }
 
     /* ---- 出盘 ---- */
-    function cast(states) {
+    function cast(states, q) {
       var now = nowCN();
       var chart;
       try {
-        chart = buildChart(now.date, now.time, states, (elQ.value || '').trim());
+        chart = buildChart(now.date, now.time, states, q);
       } catch (e) {
         toast('起卦失败：' + e.message);
         return;
@@ -687,16 +703,64 @@
       return '<span class="zb-line"><i class="zb-bar half"></i><i class="zb-bar half"></i></span>';
     }
 
+    /* 神煞：值可能是单支、双支字符串（如「辰戌」）或数组；统一拆成地支 */
+    function shenshaBranches(v) {
+      if (v === undefined || v === null) return [];
+      if (Object.prototype.toString.call(v) === '[object Array]') return v.slice();
+      var s = String(v), out = [];
+      for (var i = 0; i < s.length; i++) {
+        if (BRANCHES.indexOf(s.charAt(i)) >= 0) out.push(s.charAt(i));
+      }
+      return out;
+    }
+    function shenshaHitMap(ss) {
+      var map = {};
+      for (var n in ss) {
+        var bs = shenshaBranches(ss[n]);
+        for (var i = 0; i < bs.length; i++) {
+          if (!map[bs[i]]) map[bs[i]] = [];
+          if (map[bs[i]].indexOf(n) < 0) map[bs[i]].push(n);
+        }
+      }
+      return map;
+    }
+    function shenshaHTML(chart) {
+      var ss = chart.shensha || {}, items = [];
+      for (var n in ss) {
+        var bs = shenshaBranches(ss[n]), labels = [];
+        for (var i = 0; i < bs.length; i++) {
+          for (var no = 1; no <= 6; no++) {
+            if (chart.hexagram.lines[no - 1].branch === bs[i]) labels.push(LINE_NAMES[no - 1] + '爻');
+          }
+        }
+        items.push('<div class="zb-ssi"><b>' + esc(n) + '</b>' + esc(bs.join('')) +
+          (labels.length ? ' <span class="zb-ssp">· ' + esc(labels.join('、')) + '</span>' : '') + '</div>');
+      }
+      return '<div class="zb-ss"><div class="zb-ss-t">神煞备注</div><div class="zb-ss-g">' + items.join('') + '</div></div>';
+    }
+
+    var WX_CLASS = { 木: 'mu', 火: 'huo', 土: 'tu', 金: 'jin', 水: 'shui' };
+    function wxHTML(el) {
+      if (!el) return '';
+      return '<i class="zb-wx zb-wx-' + (WX_CLASS[el] || 'tu') + '">' + esc(el) + '</i>';
+    }
+
     function boardHTML(chart) {
       var H = chart.hexagram, pl = chart.calendar.pillars;
+      var ssHit = shenshaHitMap(chart.shensha || {});
       var head = [];
       head.push('<div class="zb-bhead">');
       head.push('<div class="zb-hrow">');
       head.push('<span class="zb-hname">' + esc(H.name) + '</span>');
-      head.push('<span class="zb-tag">' + esc(H.palace.palace + '宫') + '</span>');
+      head.push('<span class="zb-tag">' + esc(H.palace.palace + '宫·' + H.palace.element) + '</span>');
       if (H.palace.stage !== '本宫' && H.nature !== H.palace.stage) head.push('<span class="zb-tag">' + esc(H.palace.stage) + '</span>');
       if (H.nature && H.nature !== H.palace.stage) head.push('<span class="zb-tag zb-tag-nat">' + esc(H.nature) + '</span>');
-      if (H.hasChange) head.push('<span class="zb-arrow">→</span><span class="zb-hname2">' + esc(H.changedName) + '</span>');
+      if (H.hasChange) {
+        head.push('<span class="zb-arrow">→</span><span class="zb-hname2">变卦 ' + esc(H.changedName) + '</span>');
+        head.push('<span class="zb-tag">' + esc(H.changedPalace.palace + '宫·' + H.changedPalace.element) + '</span>');
+      } else {
+        head.push('<span class="zb-tag zb-tag-quiet">六爻安静，无变爻</span>');
+      }
       head.push('</div>');
       head.push('<div class="zb-mrow2">');
       head.push('<span class="zb-gz">' + esc(pl.year + '年 ' + pl.month + '月 ' + pl.day + '日 ' + pl.hour + '时') + '</span>');
@@ -709,22 +773,25 @@
       var rows = [];
       for (var no = 6; no >= 1; no--) {
         var ln = H.lines[no - 1];
+        var hits = ssHit[ln.branch] || [];
         rows.push('<div class="zb-row' + (ln.moving ? ' mov' : '') + '">');
-        rows.push('<span class="zb-spirit">' + esc(ln.spirit) + '</span>');
+        rows.push('<span class="zb-spirit">' + esc(ln.spirit) +
+          (hits.length ? '<span class="zb-sha" title="' + esc(hits.join('、')) + '">煞</span>' : '') + '</span>');
         rows.push('<span class="zb-fus' + (ln.hidden.missingRelation ? ' miss' : '') + '">' +
-          '<i class="zb-f1">' + esc(ln.hidden.relation) + '</i><i class="zb-f2">' + esc(ln.hidden.stem + ln.hidden.branch) + '</i></span>');
-        rows.push('<span class="zb-main"><i class="zb-f1">' + esc(ln.relation) + '</i><i class="zb-f2">' + esc(ln.stem + ln.branch) + '</i></span>');
+          '<i class="zb-f1">' + esc(ln.hidden.relation) + '</i><i class="zb-f2">' + esc(ln.hidden.stem + ln.hidden.branch) + wxHTML(ln.hidden.element) + '</i></span>');
+        rows.push('<span class="zb-main"><i class="zb-f1">' + esc(ln.relation) + '</i><i class="zb-f2">' + esc(ln.stem + ln.branch) + wxHTML(ln.element) + '</i></span>');
         rows.push('<span class="zb-sym">' + lineSymbolHTML(ln) + '<em class="zb-mk">' + (ln.marker === 'O' ? '○' : ln.marker === 'X' ? '×' : '') + '</em></span>');
         rows.push('<span class="zb-role' + (ln.role === '世' ? ' shi' : ln.role === '应' ? ' ying' : '') + '">' + esc(ln.role || '') + '</span>');
         rows.push('<span class="zb-bian">' + (ln.moving
-          ? '<i class="zb-f1">' + esc(ln.changedRelation) + '</i><i class="zb-f2">' + esc(ln.changedStem + ln.changedBranch) + '</i>'
+          ? '<i class="zb-f1">' + esc(ln.changedRelation) + '</i><i class="zb-f2">' + esc(ln.changedStem + ln.changedBranch) + wxHTML(ln.changedElement) + '</i>'
           : '<i class="zb-f2 zb-dim">—</i>') + '</span>');
         rows.push('</div>');
       }
 
       var legend = '<div class="zb-legend"><span>六神</span><span>伏神</span><span>主卦</span><span>爻象</span><span>世应</span><span>变爻</span></div>';
-      return '<div class="zb-board">' + head.join('') + '<div class="zb-rows">' + legend + rows.join('') + '</div>' +
-        '<div class="zb-tips"><span>○ 老阳动</span><span>× 老阴动</span></div></div>';
+      var tips = '<div class="zb-tips"><span>○ 老阳动</span><span>× 老阴动</span>' +
+        '<span class="zb-tipwx">五行：' + wxHTML('木') + wxHTML('火') + wxHTML('土') + wxHTML('金') + wxHTML('水') + '</span></div>';
+      return '<div class="zb-board">' + head.join('') + '<div class="zb-rows">' + legend + rows.join('') + '</div>' + tips + '</div>';
     }
 
     /* 微信联系卡：页面上不再生成断卦结论，改为引导一对一 */
@@ -764,6 +831,7 @@
       var html = [];
       html.push(h2(1, '卦盘'));
       html.push(boardHTML(chart));
+      html.push(shenshaHTML(chart));
       elOut.innerHTML = html.join('');
       elOut.appendChild(contactCard(chart, topicKey));
     }
@@ -787,10 +855,12 @@
       toast('已重置为六个少阳（全静卦）');
     });
     btnManualGo.addEventListener('click', function () {
+      var q = readQuestion();
+      if (!q) return;
       var now = nowCN();
       var chart;
       try {
-        chart = buildChart(now.date, now.time, state.manual.slice(), (elQ.value || '').trim());
+        chart = buildChart(now.date, now.time, state.manual.slice(), q);
       } catch (e) {
         toast('起卦失败：' + e.message);
         return;
@@ -803,6 +873,9 @@
     elTopic.addEventListener('change', function () {
       state.topic = elTopic.value;
       if (state.chart) renderOut(state.chart, state.topic);
+    });
+    elQ.addEventListener('input', function () {
+      elQ.classList.remove('err');
     });
 
     function hideManual() { elManual.hidden = true; }

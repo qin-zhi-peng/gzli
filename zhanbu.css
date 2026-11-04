@@ -26,6 +26,19 @@
   margin: 0 0 5px 2px;
   letter-spacing: .5px;
 }
+.zb-req {
+  display: inline-block;
+  font-style: normal;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--red2);
+  border: 1px solid rgba(232, 135, 122, .45);
+  border-radius: 999px;
+  padding: 0 6px;
+  margin-left: 6px;
+  letter-spacing: .5px;
+  vertical-align: 1px;
+}
 .zb-q,
 .zb-sel {
   width: 100%;
@@ -45,6 +58,14 @@
 .zb-q::placeholder { color: var(--dim2); font-size: 13px; }
 .zb-q:focus,
 .zb-sel:focus { border-color: var(--gold); }
+.zb-q.err { border-color: var(--red2); box-shadow: 0 0 0 1px rgba(232, 135, 122, .28); }
+.zb-q.err:focus { border-color: var(--red2); }
+.zb-qhelp {
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--dim2);
+  line-height: 1.65;
+}
 .zb-sel {
   background-image: linear-gradient(45deg, transparent 50%, var(--gold) 50%),
     linear-gradient(135deg, var(--gold) 50%, transparent 50%);
@@ -225,6 +246,7 @@
   white-space: nowrap;
 }
 .zb-tag-nat { color: var(--gold2); border-color: var(--gold); }
+.zb-tag-quiet { color: var(--dim2); border-color: var(--line); }
 .zb-mrow2 {
   display: flex;
   flex-wrap: wrap;
@@ -247,7 +269,7 @@
 .zb-rows { margin-top: 6px; }
 .zb-legend {
   display: grid;
-  grid-template-columns: 20px 40px 46px minmax(0, 1fr) 20px 46px;
+  grid-template-columns: 20px 44px 58px minmax(0, 1fr) 18px 54px;
   gap: 4px;
   padding: 0 2px 4px;
   font-size: 9.5px;
@@ -261,7 +283,7 @@
 
 .zb-row {
   display: grid;
-  grid-template-columns: 20px 40px 46px minmax(0, 1fr) 20px 46px;
+  grid-template-columns: 20px 44px 58px minmax(0, 1fr) 18px 54px;
   gap: 4px;
   align-items: center;
   padding: 5px 2px;
@@ -276,7 +298,15 @@
   box-shadow: inset 2px 0 0 var(--gold);
 }
 
-.zb-spirit { font-size: 10px; color: var(--dim); text-align: center; letter-spacing: -.5px; }
+.zb-spirit { font-size: 10px; color: var(--dim); text-align: center; letter-spacing: -.5px; line-height: 1.2; }
+.zb-sha {
+  display: block;
+  font-size: 9px;
+  line-height: 1.05;
+  color: var(--red2);
+  margin-top: 1px;
+  letter-spacing: 0;
+}
 .zb-fus,
 .zb-main,
 .zb-bian { display: block; min-width: 0; }
@@ -300,7 +330,26 @@
 .zb-fus .zb-f2 { color: var(--dim2); }
 .zb-fus.miss .zb-f1 { color: var(--red2); font-weight: 700; }
 .zb-bian .zb-f1 { color: var(--gold2); font-size: 10.5px; }
+.zb-bian .zb-f2 { color: var(--gold); }
+.zb-bian .zb-f2.zb-dim { color: var(--dim2); }
 .zb-dim { color: var(--dim2); }
+
+/* 五行小字（放在 f1/f2 规则之后，保证颜色不被父级盖掉） */
+.zb-wx {
+  display: inline-block;
+  font-style: normal;
+  font-size: 9px;
+  line-height: 1.1;
+  margin-left: 3px;
+  letter-spacing: 0;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+.zb-wx-mu { color: #7fae8a; }
+.zb-wx-huo { color: #e8877a; }
+.zb-wx-tu { color: #c9a86a; }
+.zb-wx-jin { color: #e8e0cf; }
+.zb-wx-shui { color: #8fa6bd; }
 
 .zb-sym {
   display: flex;
@@ -352,6 +401,38 @@
   font-size: 10px;
   color: var(--dim2);
 }
+.zb-tipwx { display: inline-flex; align-items: center; }
+.zb-tipwx .zb-wx { margin: 0 2px; font-size: 10px; }
+
+/* ---------------------------------------------------------------- 神煞备注 */
+.zb-ss {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 11px 12px;
+  margin: 8px 0 4px;
+}
+.zb-ss-t {
+  font-size: 12px;
+  color: var(--gold2);
+  font-weight: 600;
+  letter-spacing: .06em;
+  margin: 0 0 8px;
+}
+.zb-ss-g {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 10px;
+}
+.zb-ssi {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--dim);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.zb-ssi b { color: var(--text); font-weight: 600; margin-right: 4px; }
+.zb-ssp { color: var(--dim2); font-size: 10.5px; }
 
 /* ---------------------------------------------------------------- 免费浅断 */
 .zb-brief {
@@ -412,9 +493,11 @@
 /* ---------------------------------------------------------------- 窄屏微调 */
 @media (max-width: 359px) {
   .zb-row,
-  .zb-legend { grid-template-columns: 18px 34px 42px minmax(0, 1fr) 14px 40px; gap: 3px; }
+  .zb-legend { grid-template-columns: 18px 38px 50px minmax(0, 1fr) 14px 46px; gap: 3px; }
   .zb-f1 { font-size: 11px; }
   .zb-mopt { font-size: 11px; }
+  .zb-spirit { font-size: 9.5px; }
+  .zb-ss-g { grid-template-columns: 1fr; }
 }
 @media (min-width: 560px) {
   .zb-row,

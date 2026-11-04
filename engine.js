@@ -34,6 +34,7 @@
   var YINSHA = ['寅','子','戌','申','午','辰','寅','子','戌','申','午','辰'];
   var MANSIONS = [[200,'角','寿星'],[212,'亢','寿星'],[221,'氐','大火'],[236,'房','大火'],[241,'心','大火'],[246,'尾','析木'],[264,'箕','析木'],[275,'斗','星纪'],[301,'牛','星纪'],[309,'女','玄枵'],[321,'虚','玄枵'],[331,'危','玄枵'],[345,'室','娵訾'],[362,'壁','娵訾'],[371,'奎','降娄'],[387,'娄','降娄'],[399,'胃','大梁'],[413,'昴','大梁'],[424,'毕','大梁'],[440,'觜','实沈'],[442,'参','实沈'],[451,'井','鹑首'],[481,'鬼','鹑首'],[485,'柳','鹑火'],[500,'星','鹑火'],[507,'张','鹑火'],[525,'翼','鹑尾'],[543,'轸','鹑尾']];
   var SIGNS = ['白羊','金牛','双子','巨蟹','狮子','处女','天秤','天蝎','射手','摩羯','水瓶','双鱼'];
+  var JIE = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23];   // 二十四气里的「节」：小寒…大雪
 
   function mod(x, n) { return ((x % n) + n) % n; }
   function rad(d) { return d * Math.PI / 180; }
@@ -43,6 +44,13 @@
   function zi(b) { return BRANCHES.indexOf(b); }
   function mb(i) { return MAJOR_BRANCHES[mod(i, 12)]; }
   function zAt(start, off) { return BRANCHES[mod(zi(start) + off, 12)]; }
+  /* Python round：四舍六入，五取偶（银行家舍入） */
+  function pyround(x) {
+    var f = Math.floor(x), d = x - f;
+    if (d > 0.5) return f + 1;
+    if (d < 0.5) return f;
+    return (f % 2 === 0) ? f : f + 1;
+  }
 
   // ---------- 历法基础 ----------
   function jdn(y, m, d) {
@@ -312,6 +320,55 @@
     var hourBranch = (hourFrac >= 23 || hourFrac < 1) ? '子' : BRANCHES[Math.min(11, Math.floor((hourFrac + 1) / 2))];
     var off = Math.floor((lms - D.base) / 360);
     var pq = pingQi(lms);
+    // ---------- 四柱新修大运：起运日 + 每运 3600 天 ----------
+    // 起运按整点计（分钟不参与），基准是该日当地 0 点的 JD
+    var birthHourJd = (J - 0.5) + hh / 24;
+    var yangYear = mod(off, 10) % 2 === 0, male = gender === '男';
+    var forward = (yangYear && male) || (!yangYear && !male);
+    var termJd = 0, termIdx = 0, termDay = 0, ji, jx;
+    if (forward) {
+      for (ji = 0; ji < JIE.length; ji++) {
+        jx = JIE[ji];
+        // 大雪（表尾）按「下一个冬至前 15 天」回正，与 Python 引擎 _term_offsets 一致
+        var candDay = (jx === 23) ? (pq.w.start + pq.w.gap - 15) : pq.rows[jx].day;
+        var candJd = candDay + jx / 24;
+        if (candJd > birthHourJd) { termDay = candDay; termJd = candJd; termIdx = jx; break; }
+      }
+      // 出生在当年大雪之后：参照下一年小寒
+      if (!termIdx) { termDay = pq.w.next + 15; termJd = termDay + 1 / 24; termIdx = 1; }
+    } else {
+      for (ji = 0; ji < JIE.length; ji++) {
+        jx = JIE[ji];
+        var candDay2 = (jx === 23) ? (pq.w.start + pq.w.gap - 15) : pq.rows[jx].day;
+        var candJd2 = candDay2 + (jx - 1) / 24;
+        if (candJd2 < birthHourJd) { termDay = candDay2; termJd = candJd2; termIdx = jx; }
+      }
+      // 出生在小寒之前：参照上一年大雪
+      if (!termIdx) { termDay = pq.w.start - 15; termJd = termDay + 22 / 24; termIdx = 23; }
+    }
+    var diff = Math.abs(birthHourJd - termJd);
+    // 逆排且出生日与参照节同一天：按当天的整点差计
+    if (!forward && termIdx) {
+      var bDay = fromJdn(Math.floor(birthHourJd + 0.5));
+      var tDay = fromJdn(Math.floor(termDay + 0.5));
+      if (bDay.year === tDay.year && bDay.month === tDay.month && bDay.day === tDay.day) diff = (24 - termIdx) / 24;
+    }
+    var jyDays = pyround(diff * 120);
+    var jiaoJd = Math.floor(birthHourJd + 0.5) + jyDays;
+    var dayun = [];
+    for (var dk = 0; dk < 8; dk++) {
+      var startJd = jiaoJd + 3600 * dk, endJd = startJd + 3599;
+      var pi = mod(pq.sex + (forward ? dk + 1 : -(dk + 1)), 60);
+      var sAge = Math.floor(jyDays / 360) + 10 * dk;
+      dayun.push({
+        pillar: STEMS[pi % 10] + BRANCHES[pi % 12],
+        startAge: sAge,
+        endAge: sAge + 9,
+        start: fromJdn(startJd),
+        end: fromJdn(endJd),
+        sky: skyAt(startJd - 0.5 - 8 / 24, lat, lon)
+      });
+    }
     var dcyc = mod(lmsJdn + 49, 60);
     var effHourIdx = zi(hourBranch);
     var hs = mod(mod(dcyc % 10, 5) * 2 + effHourIdx, 10);
@@ -331,6 +388,7 @@
     var gods = pillars.map(function (p, i) { return i === 2 ? '日元' : tenGod(pillars[2][0], p[0]); });
     return { pillars: pillars, gods: gods, year: year, off: off, lms: lms, gender: gender, month: pq.monthName, monthBranch: pq.branch,
       lunar: zw.lunar, ziwei: zw, sky: sky, place: { lon: lon, lat: lat }, lmsJdn: lmsJdn,
+      dayun: dayun, qiyunDays: jyDays,
       gregorian: date + ' ' + ('0' + hh).slice(-2) + ':' + ('0' + mi).slice(-2) };
   }
 
