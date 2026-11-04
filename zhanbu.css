@@ -227,6 +227,15 @@
   gap: 6px;
   min-width: 0;
 }
+.zb-hrow + .zb-hrow { margin-top: 3px; }
+.zb-hlbl {
+  flex: 0 0 auto;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--dim2);
+  letter-spacing: .14em;
+}
+.zb-hlbl2 { color: var(--dim); }
 .zb-hname {
   font-size: 19px;
   font-weight: 700;
@@ -234,10 +243,15 @@
   letter-spacing: 1px;
   line-height: 1.25;
 }
-.zb-hname2 { font-size: 14px; color: var(--text); }
+.zb-hname2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: .5px;
+  line-height: 1.25;
+}
 .zb-arrow { color: var(--dim2); font-size: 12px; }
-.zb-tag {
-  font-size: 11px;
+.zb-tag {  font-size: 11px;
   color: var(--gold);
   border: 1px solid var(--line2);
   background: var(--panel2);
@@ -267,10 +281,21 @@
 }
 
 .zb-rows { margin-top: 6px; }
-.zb-legend {
+
+/* 六列：六神 | 伏神 | 主卦六亲干支 | 主卦爻象 | 变卦六亲干支 | 变卦爻象
+   六神按爻位（主变同位同神）只列一次，伏神只属主卦，所以左两列是共用的。
+   安静卦（无动爻）没有变卦，整块收成四列。 */
+.zb-legend,
+.zb-row {
   display: grid;
-  grid-template-columns: 20px 44px 58px minmax(0, 1fr) 18px 54px;
+  grid-template-columns: 21px 42px max-content minmax(0, 1fr) max-content minmax(0, 1fr);
   gap: 4px;
+}
+.zb-board.quiet .zb-legend,
+.zb-board.quiet .zb-row {
+  grid-template-columns: 21px 42px max-content minmax(0, 1fr);
+}
+.zb-legend {
   padding: 0 2px 4px;
   font-size: 9.5px;
   color: var(--dim2);
@@ -278,13 +303,11 @@
   letter-spacing: .5px;
 }
 .zb-legend span { white-space: nowrap; }
-.zb-legend span:nth-child(3) { text-align: left; }
-.zb-legend span:nth-child(2) { text-align: left; }
+.zb-legend .zb-lg { color: var(--dim); }
+.zb-legend .zb-lg-main { grid-column: 3 / span 2; }
+.zb-legend .zb-lg-chg { grid-column: 5 / span 2; color: var(--gold); border-left: 1px dashed var(--line2); }
 
 .zb-row {
-  display: grid;
-  grid-template-columns: 20px 44px 58px minmax(0, 1fr) 18px 54px;
-  gap: 4px;
   align-items: center;
   padding: 5px 2px;
   border-radius: 8px;
@@ -299,21 +322,17 @@
 }
 
 .zb-spirit { font-size: 10px; color: var(--dim); text-align: center; letter-spacing: -.5px; line-height: 1.2; }
-.zb-sha {
-  display: block;
-  font-size: 9px;
-  line-height: 1.05;
-  color: var(--red2);
-  margin-top: 1px;
-  letter-spacing: 0;
-}
 .zb-fus,
 .zb-main,
-.zb-bian { display: block; min-width: 0; }
+.zb-chg { display: block; min-width: 0; }
+.zb-chg {
+  padding-left: 6px;
+  border-left: 1px dashed var(--line2);
+}
 .zb-f1 {
   display: block;
   font-size: 11.5px;
-  line-height: 1.25;
+  line-height: 1.3;
   color: var(--text);
   font-style: normal;
   white-space: nowrap;
@@ -321,7 +340,7 @@
 .zb-f2 {
   display: block;
   font-size: 9.5px;
-  line-height: 1.25;
+  line-height: 1.3;
   color: var(--dim);
   font-style: normal;
   white-space: nowrap;
@@ -329,10 +348,19 @@
 .zb-fus .zb-f1 { color: var(--dim); font-size: 10.5px; }
 .zb-fus .zb-f2 { color: var(--dim2); }
 .zb-fus.miss .zb-f1 { color: var(--red2); font-weight: 700; }
-.zb-bian .zb-f1 { color: var(--gold2); font-size: 10.5px; }
-.zb-bian .zb-f2 { color: var(--gold); }
-.zb-bian .zb-f2.zb-dim { color: var(--dim2); }
 .zb-dim { color: var(--dim2); }
+
+/* 旬空标记：只标在落空的支旁边 */
+.zb-kong {
+  display: inline-block;
+  font-style: normal;
+  font-size: 8.5px;
+  line-height: 1.1;
+  margin-left: 2px;
+  color: var(--red2);
+  letter-spacing: 0;
+  vertical-align: 1px;
+}
 
 /* 五行小字（放在 f1/f2 规则之后，保证颜色不被父级盖掉） */
 .zb-wx {
@@ -354,26 +382,27 @@
 .zb-sym {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
 }
+.zb-sym2 { gap: 0; }
 .zb-line {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   flex: 1 1 auto;
   min-width: 0;
 }
 .zb-bar {
   display: block;
   height: 7px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--gold2), var(--gold));
+  border-radius: 1px;
+  background: linear-gradient(180deg, var(--gold2), var(--gold) 55%, #a98a41);
   flex: 0 0 auto;
 }
 .zb-bar.full { width: 100%; }
 .zb-bar.half { width: calc(50% - 3px); }
-.zb-row.mov .zb-bar { background: linear-gradient(90deg, var(--red2), var(--red)); }
+.zb-row.mov .zb-bar { background: linear-gradient(180deg, #f0a294, var(--red2) 55%, var(--red)); }
 .zb-mk {
   flex: 0 0 11px;
   font-size: 12px;
@@ -383,13 +412,23 @@
   line-height: 1;
 }
 
+/* 世应小字：主卦金、变卦暗一档；只占六亲后一点位置，不再单开一列 */
 .zb-role {
-  font-size: 10.5px;
-  text-align: center;
-  color: transparent;
+  display: inline-block;
+  font-style: normal;
+  font-size: 9.5px;
+  line-height: 1.2;
+  font-weight: 700;
+  margin-left: 4px;
+  letter-spacing: 0;
+  vertical-align: 1px;
+  white-space: nowrap;
 }
-.zb-role.shi { color: var(--gold2); font-weight: 700; }
-.zb-role.ying { color: var(--dim); font-weight: 600; }
+.zb-role.shi { color: var(--gold2); }
+.zb-role.ying { color: var(--dim); }
+.zb-role.zb-role2 { font-weight: 600; }
+.zb-role.zb-role2.shi { color: var(--gold); opacity: .8; }
+.zb-role.zb-role2.ying { color: var(--dim2); }
 
 .zb-tips {
   display: flex;
@@ -418,6 +457,13 @@
   font-weight: 600;
   letter-spacing: .06em;
   margin: 0 0 8px;
+}
+.zb-ss-tn {
+  margin-left: 6px;
+  font-size: 9.5px;
+  font-weight: 400;
+  color: var(--dim2);
+  letter-spacing: 0;
 }
 .zb-ss-g {
   display: grid;
@@ -493,17 +539,49 @@
 /* ---------------------------------------------------------------- 窄屏微调 */
 @media (max-width: 359px) {
   .zb-row,
-  .zb-legend { grid-template-columns: 18px 38px 50px minmax(0, 1fr) 14px 46px; gap: 3px; }
+  .zb-legend { grid-template-columns: 18px 38px max-content minmax(0, 1fr) max-content minmax(0, 1fr); gap: 3px; }
+  .zb-board.quiet .zb-row,
+  .zb-board.quiet .zb-legend { grid-template-columns: 18px 38px max-content minmax(0, 1fr); }
   .zb-f1 { font-size: 11px; }
   .zb-mopt { font-size: 11px; }
   .zb-spirit { font-size: 9.5px; }
   .zb-ss-g { grid-template-columns: 1fr; }
+  .zb-role { margin-left: 2px; }
 }
 @media (min-width: 560px) {
   .zb-row,
-  .zb-legend { grid-template-columns: 26px 54px 60px minmax(0, 1fr) 20px 60px; gap: 6px; }
+  .zb-legend { grid-template-columns: 26px 54px max-content minmax(0, 1fr) max-content minmax(0, 1fr); gap: 6px; }
+  .zb-board.quiet .zb-row,
+  .zb-board.quiet .zb-legend { grid-template-columns: 26px 54px max-content minmax(0, 1fr); }
   .zb-f1 { font-size: 12.5px; }
   .zb-f2 { font-size: 10.5px; }
   .zb-bar { height: 8px; }
   .zb-hname { font-size: 21px; }
+  .zb-hname2 { font-size: 16px; }
+}
+
+/* 大屏 / 平板横放：卦名/四柱/钥语挪到左侧一栏，六爻盘占右侧，避免把爻线拉成进度条 */
+@media (min-width: 720px) {
+  .zb-board {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    column-gap: 22px;
+    align-items: stretch;
+    padding: 15px 13px 12px;
+  }
+  .zb-bhead {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: stretch;
+    border-bottom: 0;
+    border-right: 1px solid var(--line2);
+    padding: 2px 18px 2px 2px;
+  }
+  .zb-rows { grid-column: 2; grid-row: 1; align-self: start; margin-top: 0; }
+  .zb-tips { grid-column: 2; grid-row: 2; }
+  .zb-mrow2 { gap: 3px 10px; }
+  .zb-kq { margin-top: 8px; line-height: 1.7; }
+  .zb-f1 { font-size: 13px; }
+  .zb-f2 { font-size: 10.5px; }
+  .zb-bar { height: 9px; }
 }

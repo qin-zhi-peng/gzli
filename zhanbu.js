@@ -346,11 +346,13 @@
     var pal = PALACES[bits.join('')];
     var palace = pal[0], stage = pal[1], shi = pal[2], ying = pal[3];
     var chpal = PALACES[chbits.join('')];
-    var chpalace = chpal[0], chstage = chpal[1];
+    var chpalace = chpal[0], chstage = chpal[1], chshi = chpal[2], chying = chpal[3];
     var pe = TRI[palace].element;
     var che = TRI[chpalace].element;
     var s0 = SPIRIT_START[cal.pillars.day.charAt(0)];
     var branches = TRI[lower].na.slice(0, 3).concat(TRI[upper].na.slice(3, 6));
+    /* 变卦六爻纳甲（按变卦自身上下经卦取，内外干分用）；六亲仍依主卦宫，见 01-base「硬规则」 */
+    var chBranches = TRI[chlower].na.slice(0, 3).concat(TRI[chupper].na.slice(3, 6));
 
     var lines = [], mainRel = {};
     for (var no = 1; no <= 6; no++) {
@@ -382,6 +384,7 @@
         spirit: SPIRITS[(s0 + no - 1) % 6],
         changedBranch: chBr, changedStem: chStem, changedElement: ELEM[chBr],
         changedRelation: relation(pe, ELEM[chBr]),
+        changedRole: no === chshi ? '世' : (no === chying ? '应' : ''),
         hidden: {
           stem: hstem, branch: hbr, element: ELEM[hbr], relation: hrel,
           hiddenTrigram: ht,
@@ -407,13 +410,14 @@
         hasChange: hasChange,
         changedName: hasChange ? NAMES[chupper + '-' + chlower] : '',
         palace: { palace: palace, stage: stage, shi: shi, ying: ying, element: pe },
-        changedPalace: { palace: chpalace, stage: chstage, element: che },
+        changedPalace: { palace: chpalace, stage: chstage, shi: chshi, ying: chying, element: che },
         movingLines: (function () {
           var arr = [];
           for (var q = 0; q < 6; q++) if (norm[q].moving) arr.push(q + 1);
           return arr;
         })(),
         nature: classify(bits, branches),
+        changedNature: hasChange ? classify(chbits, chBranches) : '',
         lines: lines
       }
     };
@@ -713,17 +717,6 @@
       }
       return out;
     }
-    function shenshaHitMap(ss) {
-      var map = {};
-      for (var n in ss) {
-        var bs = shenshaBranches(ss[n]);
-        for (var i = 0; i < bs.length; i++) {
-          if (!map[bs[i]]) map[bs[i]] = [];
-          if (map[bs[i]].indexOf(n) < 0) map[bs[i]].push(n);
-        }
-      }
-      return map;
-    }
     function shenshaHTML(chart) {
       var ss = chart.shensha || {}, items = [];
       for (var n in ss) {
@@ -736,7 +729,7 @@
         items.push('<div class="zb-ssi"><b>' + esc(n) + '</b>' + esc(bs.join('')) +
           (labels.length ? ' <span class="zb-ssp">· ' + esc(labels.join('、')) + '</span>' : '') + '</div>');
       }
-      return '<div class="zb-ss"><div class="zb-ss-t">神煞备注</div><div class="zb-ss-g">' + items.join('') + '</div></div>';
+      return '<div class="zb-ss"><div class="zb-ss-t">神煞备注<span class="zb-ss-tn">按主卦爻位</span></div><div class="zb-ss-g">' + items.join('') + '</div></div>';
     }
 
     var WX_CLASS = { 木: 'mu', 火: 'huo', 土: 'tu', 金: 'jin', 水: 'shui' };
@@ -745,23 +738,38 @@
       return '<i class="zb-wx zb-wx-' + (WX_CLASS[el] || 'tu') + '">' + esc(el) + '</i>';
     }
 
+    /* 世应小字（主卦金字、变卦暗一档） */
+    function roleHTML(role, dim) {
+      if (!role) return '';
+      return '<em class="zb-role' + (role === '世' ? ' shi' : ' ying') + (dim ? ' zb-role2' : '') + '">' + esc(role) + '</em>';
+    }
+    /* 旬空：只看日辰旬空，主卦、变卦的支都可能落空 */
     function boardHTML(chart) {
       var H = chart.hexagram, pl = chart.calendar.pillars;
-      var ssHit = shenshaHitMap(chart.shensha || {});
+      var hasCh = !!H.hasChange;
+      var chp = H.changedPalace || {};
+      var dayVoid = chart.calendar.dayVoid || '';
+      function kongHTML(branch) {
+        return dayVoid.indexOf(branch) >= 0 ? '<i class="zb-kong" title="旬空">空</i>' : '';
+      }
       var head = [];
       head.push('<div class="zb-bhead">');
-      head.push('<div class="zb-hrow">');
-      head.push('<span class="zb-hname">' + esc(H.name) + '</span>');
-      head.push('<span class="zb-tag">' + esc(H.palace.palace + '宫·' + H.palace.element) + '</span>');
-      if (H.palace.stage !== '本宫' && H.nature !== H.palace.stage) head.push('<span class="zb-tag">' + esc(H.palace.stage) + '</span>');
-      if (H.nature && H.nature !== H.palace.stage) head.push('<span class="zb-tag zb-tag-nat">' + esc(H.nature) + '</span>');
-      if (H.hasChange) {
-        head.push('<span class="zb-arrow">→</span><span class="zb-hname2">变卦 ' + esc(H.changedName) + '</span>');
-        head.push('<span class="zb-tag">' + esc(H.changedPalace.palace + '宫·' + H.changedPalace.element) + '</span>');
-      } else {
-        head.push('<span class="zb-tag zb-tag-quiet">六爻安静，无变爻</span>');
+      /* 主卦一行、变卦一行：窄屏不会挤成乱换行 */
+      head.push('<div class="zb-hrow"><span class="zb-hlbl">主卦</span>' +
+        '<span class="zb-hname">' + esc(H.name) + '</span>' +
+        '<span class="zb-tag">' + esc(H.palace.palace + '宫·' + H.palace.element) + '</span>' +
+        (H.palace.stage !== '本宫' && H.nature !== H.palace.stage ? '<span class="zb-tag">' + esc(H.palace.stage) + '</span>' : '') +
+        (H.nature && H.nature !== H.palace.stage ? '<span class="zb-tag zb-tag-nat">' + esc(H.nature) + '</span>' : '') +
+        (!hasCh ? '<span class="zb-tag zb-tag-quiet">六爻安静</span>' : '') +
+        '</div>');
+      if (hasCh) {
+        head.push('<div class="zb-hrow"><span class="zb-hlbl zb-hlbl2">变卦</span>' +
+          '<span class="zb-hname2">' + esc(H.changedName) + '</span>' +
+          '<span class="zb-tag">' + esc(chp.palace + '宫·' + chp.element) + '</span>' +
+          (chp.stage && chp.stage !== '本宫' ? '<span class="zb-tag">' + esc(chp.stage) + '</span>' : '') +
+          (H.changedNature && H.changedNature !== chp.stage ? '<span class="zb-tag zb-tag-nat">' + esc(H.changedNature) + '</span>' : '') +
+          '</div>');
       }
-      head.push('</div>');
       head.push('<div class="zb-mrow2">');
       head.push('<span class="zb-gz">' + esc(pl.year + '年 ' + pl.month + '月 ' + pl.day + '日 ' + pl.hour + '时') + '</span>');
       head.push('<span class="zb-void">空亡 ' + esc(chart.calendar.dayVoid) + '</span>');
@@ -773,25 +781,34 @@
       var rows = [];
       for (var no = 6; no >= 1; no--) {
         var ln = H.lines[no - 1];
-        var hits = ssHit[ln.branch] || [];
         rows.push('<div class="zb-row' + (ln.moving ? ' mov' : '') + '">');
-        rows.push('<span class="zb-spirit">' + esc(ln.spirit) +
-          (hits.length ? '<span class="zb-sha" title="' + esc(hits.join('、')) + '">煞</span>' : '') + '</span>');
+        /* 六神按爻位，主变同位同神，只列一次 */
+        rows.push('<span class="zb-spirit">' + esc(ln.spirit) + '</span>');
         rows.push('<span class="zb-fus' + (ln.hidden.missingRelation ? ' miss' : '') + '">' +
-          '<i class="zb-f1">' + esc(ln.hidden.relation) + '</i><i class="zb-f2">' + esc(ln.hidden.stem + ln.hidden.branch) + wxHTML(ln.hidden.element) + '</i></span>');
-        rows.push('<span class="zb-main"><i class="zb-f1">' + esc(ln.relation) + '</i><i class="zb-f2">' + esc(ln.stem + ln.branch) + wxHTML(ln.element) + '</i></span>');
-        rows.push('<span class="zb-sym">' + lineSymbolHTML(ln) + '<em class="zb-mk">' + (ln.marker === 'O' ? '○' : ln.marker === 'X' ? '×' : '') + '</em></span>');
-        rows.push('<span class="zb-role' + (ln.role === '世' ? ' shi' : ln.role === '应' ? ' ying' : '') + '">' + esc(ln.role || '') + '</span>');
-        rows.push('<span class="zb-bian">' + (ln.moving
-          ? '<i class="zb-f1">' + esc(ln.changedRelation) + '</i><i class="zb-f2">' + esc(ln.changedStem + ln.changedBranch) + wxHTML(ln.changedElement) + '</i>'
-          : '<i class="zb-f2 zb-dim">—</i>') + '</span>');
+          '<i class="zb-f1">' + esc(ln.hidden.relation) + '</i>' +
+          '<i class="zb-f2">' + esc(ln.hidden.stem + ln.hidden.branch) + wxHTML(ln.hidden.element) + '</i></span>');
+        rows.push('<span class="zb-main">' +
+          '<i class="zb-f1">' + esc(ln.relation) + roleHTML(ln.role, false) + '</i>' +
+          '<i class="zb-f2">' + esc(ln.stem + ln.branch) + wxHTML(ln.element) + kongHTML(ln.branch) + '</i></span>');
+        rows.push('<span class="zb-sym">' + lineSymbolHTML(ln) + '<em class="zb-mk">' +
+          (ln.marker === 'O' ? '○' : ln.marker === 'X' ? '×' : '') + '</em></span>');
+        if (hasCh) {
+          rows.push('<span class="zb-chg">' +
+            '<i class="zb-f1">' + esc(ln.changedRelation) + roleHTML(ln.changedRole, true) + '</i>' +
+            '<i class="zb-f2">' + esc(ln.changedStem + ln.changedBranch) + wxHTML(ln.changedElement) + kongHTML(ln.changedBranch) + '</i></span>');
+          rows.push('<span class="zb-sym zb-sym2">' + lineSymbolHTML({ yang: ln.moving ? 1 - ln.yang : ln.yang }) + '<em class="zb-mk"></em></span>');
+        }
         rows.push('</div>');
       }
 
-      var legend = '<div class="zb-legend"><span>六神</span><span>伏神</span><span>主卦</span><span>爻象</span><span>世应</span><span>变爻</span></div>';
+      var legend = '<div class="zb-legend"><span>六神</span><span>伏神</span>' +
+        '<span class="zb-lg zb-lg-main">主卦</span>' +
+        (hasCh ? '<span class="zb-lg zb-lg-chg">变卦</span>' : '') + '</div>';
       var tips = '<div class="zb-tips"><span>○ 老阳动</span><span>× 老阴动</span>' +
-        '<span class="zb-tipwx">五行：' + wxHTML('木') + wxHTML('火') + wxHTML('土') + wxHTML('金') + wxHTML('水') + '</span></div>';
-      return '<div class="zb-board">' + head.join('') + '<div class="zb-rows">' + legend + rows.join('') + '</div>' + tips + '</div>';
+        '<span class="zb-tipwx">五行：' + wxHTML('木') + wxHTML('火') + wxHTML('土') + wxHTML('金') + wxHTML('水') + '</span>' +
+        (hasCh ? '<span>六神按爻位，主变同位同神</span>' : '') + '</div>';
+      return '<div class="zb-board' + (hasCh ? '' : ' quiet') + '">' + head.join('') +
+        '<div class="zb-rows">' + legend + rows.join('') + '</div>' + tips + '</div>';
     }
 
     /* 微信联系卡：页面上不再生成断卦结论，改为引导一对一 */
