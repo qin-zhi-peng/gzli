@@ -353,6 +353,11 @@
     var branches = TRI[lower].na.slice(0, 3).concat(TRI[upper].na.slice(3, 6));
     /* 变卦六爻纳甲（按变卦自身上下经卦取，内外干分用）；六亲仍依主卦宫，见 01-base「硬规则」 */
     var chBranches = TRI[chlower].na.slice(0, 3).concat(TRI[chupper].na.slice(3, 6));
+    /* 伏卦：本宫卦与错卦飞伏——半卦同宫则取错卦，不同宫则取本宫卦；伏神六亲仍依主卦宫 */
+    var htLower = (lower === palace) ? OPP[palace] : palace;
+    var htUpper = (upper === palace) ? OPP[palace] : palace;
+    var hiddenBits = TRI[htLower].bits.concat(TRI[htUpper].bits).join('');
+    var hpal2 = PALACES[hiddenBits];
 
     var lines = [], mainRel = {};
     for (var no = 1; no <= 6; no++) {
@@ -410,6 +415,11 @@
         hasChange: hasChange,
         changedName: hasChange ? NAMES[chupper + '-' + chlower] : '',
         palace: { palace: palace, stage: stage, shi: shi, ying: ying, element: pe },
+        hiddenHexagram: {
+          name: NAMES[htUpper + '-' + htLower],
+          lower: htLower, upper: htUpper,
+          palace: hpal2[0], stage: hpal2[1], element: TRI[hpal2[0]].element
+        },
         changedPalace: { palace: chpalace, stage: chstage, shi: chshi, ying: chying, element: che },
         movingLines: (function () {
           var arr = [];
@@ -754,7 +764,7 @@
       }
       var head = [];
       head.push('<div class="zb-bhead">');
-      /* 主卦一行、变卦一行：窄屏不会挤成乱换行 */
+      /* 主卦一行、变卦一行、伏卦一行：窄屏不会挤成乱换行 */
       head.push('<div class="zb-hrow"><span class="zb-hlbl">主卦</span>' +
         '<span class="zb-hname">' + esc(H.name) + '</span>' +
         '<span class="zb-tag">' + esc(H.palace.palace + '宫·' + H.palace.element) + '</span>' +
@@ -768,6 +778,12 @@
           '<span class="zb-tag">' + esc(chp.palace + '宫·' + chp.element) + '</span>' +
           (chp.stage && chp.stage !== '本宫' ? '<span class="zb-tag">' + esc(chp.stage) + '</span>' : '') +
           (H.changedNature && H.changedNature !== chp.stage ? '<span class="zb-tag zb-tag-nat">' + esc(H.changedNature) + '</span>' : '') +
+          '</div>');
+      }
+      if (H.hiddenHexagram) {
+        head.push('<div class="zb-hrow"><span class="zb-hlbl zb-hlbl2">伏卦</span>' +
+          '<span class="zb-hname3">' + esc(H.hiddenHexagram.name) + '</span>' +
+          '<span class="zb-tag zb-tag-quiet">' + esc(H.hiddenHexagram.palace + '宫·' + H.hiddenHexagram.element) + '</span>' +
           '</div>');
       }
       head.push('<div class="zb-mrow2">');
@@ -806,7 +822,7 @@
         (hasCh ? '<span class="zb-lg zb-lg-chg">变卦</span>' : '') + '</div>';
       var tips = '<div class="zb-tips"><span>○ 老阳动</span><span>× 老阴动</span>' +
         '<span class="zb-tipwx">五行：' + wxHTML('木') + wxHTML('火') + wxHTML('土') + wxHTML('金') + wxHTML('水') + '</span>' +
-        (hasCh ? '<span>六神按爻位，主变同位同神</span>' : '') + '</div>';
+        '<span>' + (hasCh ? '六神按爻位；伏神、变卦六亲依主卦宫' : '六神按爻位；伏神六亲依主卦宫') + '</span></div>';
       return '<div class="zb-board' + (hasCh ? '' : ' quiet') + '">' + head.join('') +
         '<div class="zb-rows">' + legend + rows.join('') + '</div>' + tips + '</div>';
     }

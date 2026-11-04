@@ -250,6 +250,13 @@
   letter-spacing: .5px;
   line-height: 1.25;
 }
+.zb-hname3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  letter-spacing: .5px;
+  line-height: 1.3;
+}
 .zb-arrow { color: var(--dim2); font-size: 12px; }
 .zb-tag {  font-size: 11px;
   color: var(--gold);
