@@ -274,7 +274,7 @@
 
   /* ---------------- 页面渲染 ---------------- */
 
-  var state = { sel: {}, drink: '', special: {}, last: null, lastIds: null, copyText: '' };
+  var state = { sel: {}, drink: '', special: {}, other: '', last: null, lastIds: null, copyText: '' };
 
   function chipHTML(s) {
     return '<button type="button" class="zy-chip" data-id="' + s.id + '" aria-pressed="false"' +
@@ -325,11 +325,13 @@
     h.push('</div>');
     h.push('<div data-role="groups">' + groupsHTML() + '</div>');
     h.push('<div class="zy-extra">');
-    h.push('<h4>两个加问 <em>可不答，答了更准</em></h4>');
+    h.push('<h4>补充信息 <em>可不答，答了更准</em></h4>');
     h.push('<p>想喝热水还是冷水？这一条决定“真热”还是“假热”。</p>');
     h.push('<div class="zy-seg" data-k="drink"><button type="button" data-v="hot">想喝热水</button><button type="button" data-v="cold">想喝冷水</button><button type="button" data-v="none">都行 / 没注意</button></div>');
     h.push('<p>有没有需要特别避开的情况？可多选。</p>');
     h.push('<div class="zy-seg" data-k="special"><button type="button" data-v="none">无</button><button type="button" data-v="pregnant">怀孕 / 哺乳</button><button type="button" data-v="western">在服西药</button></div>');
+    h.push('<label class="zy-otherlab" for="zyOther">身体其他感觉不舒服的症状 <em>可不填</em></label>');
+    h.push('<textarea id="zyOther" class="zy-other" data-role="other" rows="3" maxlength="300" placeholder="例如：后背发紧、早起口苦、夜里脚心发热……"></textarea>');
     h.push('<div class="zy-note" data-role="hint" hidden></div>');
     h.push('</div>');
     h.push('</div>');
@@ -401,12 +403,19 @@
     return 'zy-low';
   }
 
+  function otherHTML(r) {
+    var txt = r && r.extra && r.extra.other ? String(r.extra.other) : '';
+    if (!txt) return '';
+    return '<div class="zy-otherview"><b>补充症状</b><span>' + esc(txt) + '</span></div>';
+  }
+
   function renderInsufficient(rootEl, r) {
     var host = rootEl.querySelector('[data-role="result"]');
     var h = [];
     h.push('<div class="zy-rhead"><div class="zy-rhead-main"><div class="zy-res-k">辨 证 倾 向</div><div class="zy-rt">还定不下来</div><p class="zy-rsub">不是没有方向，是信息还不够。</p></div>');
     h.push('<div class="zy-ring" style="--p:' + r.confidencePct + '"><b>' + r.confidencePct + '<i>%</i></b><span>把握度</span></div></div>');
     h.push('<div class="zy-badges"><span class="zy-badge zy-low">信息不足</span><span class="zy-badge">已选 ' + r.count + ' 项</span></div>');
+    h.push(otherHTML(r));
     h.push('<div class="zy-insufficient">');
     h.push('<h3>再补 2–3 项，方向就清楚了</h3>');
     h.push('<p>' + esc(r.note) + '</p>');
@@ -438,6 +447,8 @@
     if (secName) h.push('<span class="zy-badge">兼 ' + esc(secName) + '</span>');
     h.push('<span class="zy-badge">' + esc(t.location) + '</span>');
     h.push('</div>');
+
+    h.push(otherHTML(r));
 
     h.push('<div class="zy-portrait">' + esc(t.portrait) + '</div>');
 
@@ -481,8 +492,9 @@
     var ids = state.lastIds || Object.keys(state.sel);
     var copyTxt = (function () {
       var symTxt = ids.map(function (id) { var s = BY_ID[id]; return s ? s.name : id; }).join('、');
+      var otherTxt = r.extra && r.extra.other ? String(r.extra.other).trim() : '';
       var tendency = t ? t.name + (r.secondary && r.secondary.length ? '（兼 ' + r.secondary.slice(0, 2).join('、') + '）' : '') : '';
-      return '一恒体系 · 中医自查\n症状：' + symTxt + '\n倾向：' + tendency + '（把握度 ' + r.confidencePct + '%）';
+      return '一恒体系 · 中医自查\n症状：' + symTxt + (otherTxt ? '\n补充：' + otherTxt : '') + '\n倾向：' + tendency + '（把握度 ' + r.confidencePct + '%）';
     })();
     state.copyText = copyTxt;
 
@@ -549,9 +561,12 @@
   function runDiagnose(rootEl) {
     var ids = Object.keys(state.sel);
     if (!ids.length) { toast('先勾选 1–2 项身体感受'); return; }
+    var otherEl = rootEl.querySelector('[data-role="other"]');
+    if (otherEl) state.other = otherEl.value.trim();
     var extra = {
       drinkTemp: state.drink || '',
-      special: Object.keys(state.special)
+      special: Object.keys(state.special),
+      other: state.other || ''
     };
     var r = diagnose(ids, extra);
     state.last = r;
@@ -568,6 +583,12 @@
   }
 
   function bind(rootEl) {
+    rootEl.addEventListener('input', function (e) {
+      var other = closest(e.target, '[data-role="other"]');
+      if (!other) return;
+      state.other = other.value.trim();
+      if (state.last) showCta(rootEl, true);
+    });
     rootEl.addEventListener('click', function (e) {
       var chip = closest(e.target, '.zy-chip');
       if (chip && rootEl.contains(chip)) {
@@ -650,7 +671,7 @@
       rootEl.innerHTML = '<div class="zy-warn"><b>数据未加载</b><p>请先引入 zhongyi-data.js，再引入 zhongyi.js。</p></div>';
       return;
     }
-    state = { sel: {}, drink: '', special: {}, last: null, lastIds: null, copyText: '' };
+    state = { sel: {}, drink: '', special: {}, other: '', last: null, lastIds: null, copyText: '' };
     rootEl.classList.add('zy-root');
     rootEl.innerHTML = shellHTML();
     bind(rootEl);

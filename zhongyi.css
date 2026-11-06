@@ -463,6 +463,61 @@
   background: var(--panel2);
 }
 
+/* 其他症状输入 */
+.zy-otherlab {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.zy-otherlab em {
+  color: var(--dim2);
+  font-style: normal;
+  font-size: 10.5px;
+  margin-left: 4px;
+}
+.zy-other {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  margin: 0 0 12px;
+  padding: 9px 11px;
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.65;
+  outline: none;
+  resize: vertical;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.zy-other::placeholder { color: var(--dim2); font-size: 11.5px; }
+.zy-other:focus { border-color: var(--gold); }
+
+/* 结果区回显补充症状 */
+.zy-otherview {
+  margin: 10px 0 0;
+  padding: 9px 11px;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  background: var(--panel2);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.zy-otherview b {
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--gold2);
+  font-weight: 600;
+}
+
 /* ---------- 底部主按钮 ---------- */
 .zy-cta {
   position: sticky;

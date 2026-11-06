@@ -12,30 +12,23 @@
 
   function mount(rootEl) {
     var YH = root.YH;   /* app.js 最后加载，只能在运行时取 */
+    /* 出生小时按整点选择，与参考站颗粒度一致（大运交运日按整点推算） */
+    var hourOpts = '';
+    for (var oh = 0; oh < 24; oh++) {
+      var zhiName = ZHI[Math.floor(((oh + 1) % 24) / 2)];
+      var hourLabel = oh === 23 ? '23 点 · 晚子时' : oh + ' 点 · ' + zhiName + '时';
+      hourOpts += '<option value="' + oh + '"' + (oh === 7 ? ' selected' : '') + '>' + hourLabel + '</option>';
+    }
     rootEl.innerHTML = '' +
       '<div class="card">' +
         '<div class="row">' +
           '<input id="mlDate" type="date" value="2000-03-15" aria-label="出生日期">' +
-          '<select id="mlHour" aria-label="出生时辰">' +
-            '<option value="0">子时 23-1（按 00:30）</option>' +
-            '<option value="23">晚子时 23-24（按 23:30）</option>' +
-            '<option value="1">丑时 1-3</option>' +
-            '<option value="3">寅时 3-5</option>' +
-            '<option value="5">卯时 5-7</option>' +
-            '<option value="7" selected>辰时 7-9</option>' +
-            '<option value="9">巳时 9-11</option>' +
-            '<option value="11">午时 11-13</option>' +
-            '<option value="13">未时 13-15</option>' +
-            '<option value="15">申时 15-17</option>' +
-            '<option value="17">酉时 17-19</option>' +
-            '<option value="19">戌时 19-21</option>' +
-            '<option value="21">亥时 21-23</option>' +
-          '</select>' +
+          '<select id="mlHour" aria-label="出生时间">' + hourOpts + '</select>' +
           '<select id="mlGender" style="flex:0 0 86px" aria-label="性别"><option>男</option><option>女</option></select>' +
         '</div>' +
         '<button class="btn" id="mlRun">排 盘</button>' +
         '<div class="ml-dirty" id="mlDirty">参数已改，点『排盘』更新</div>' +
-        '<div class="hint" style="margin:8px 0 0">默认是示例生日（2000-03-15 辰时）——改成你自己的出生时间再点排盘。<br>年柱＝岁序（360 日一岁）· 月柱＝平气月 · 日柱＝连续干支 · 时柱＝时辰。</div>' +
+        '<div class="hint" style="margin:8px 0 0">默认是示例生日（2000-03-15 7 点 · 辰时）——改成你自己的出生小时再点排盘。<br>年柱＝岁序（360 日一岁）· 月柱＝平气月 · 日柱＝连续干支 · 时柱＝时辰。</div>' +
       '</div>' +
       '<div class="ml-empty" id="mlEmpty">填好出生时间与性别，点『排盘』查看四柱、紫微与十年大运。</div>' +
       '<div id="mlPillars"></div>' +
@@ -74,7 +67,7 @@
       }
       try {
         var hour = +$h.value;
-        var r = root.ML.compute({ date: $d.value, hour: hour, minute: 30, gender: $g.value });
+        var r = root.ML.compute({ date: $d.value, hour: hour, minute: 0, gender: $g.value });
         last = r;
         renderPillars(r);
         renderSky(r);
@@ -144,16 +137,22 @@
       var gans = r.pillars.map(function (p) { return p.charAt(0); });
       var zhis = r.pillars.map(function (p) { return p.charAt(1); });
       var wxs = r.pillars.map(function (p) { return STEM_WX[p.charAt(0)] + BRANCH_WX[p.charAt(1)]; });
-      var rows = [['天干'].concat(gans), ['地支'].concat(zhis), ['五行'].concat(wxs)];
-      var body = rows.map(function (row, i) {
-        return '<tr>' + row.map(function (c, j) {
-          if (j === 0) return '<td style="padding:6px 4px;color:#8a7d68;font-size:12.5px">' + c + '</td>';
-          if (i === 2) return '<td style="padding:6px 4px;color:var(--gold);font-size:13.5px;letter-spacing:2px">' + c + '</td>';
-          return '<td style="padding:6px 4px;color:var(--text);font-size:15px;font-weight:600;letter-spacing:1px">' + c + '</td>';
-        }).join('') + '</tr>';
-      }).join('');
+      var gods = r.gods || ['', '', '日元', ''];
+      function rowHTML(label, vals, cls) {
+        var cells = vals.map(function (c, i) {
+          var day = i === 2 ? ' ft-day' : '';
+          if (cls === 'god') return '<td class="ft-god' + (c === '日元' ? ' ft-yuan' : '') + day + '">' + c + '</td>';
+          if (cls === 'wx') return '<td class="ft-wx' + day + '">' + c + '</td>';
+          return '<td class="ft-gz' + day + '">' + c + '</td>';
+        }).join('');
+        return '<tr><td class="ft-lbl">' + label + '</td>' + cells + '</tr>';
+      }
+      var body = rowHTML('十神', gods, 'god') +
+        rowHTML('天干', gans, 'gz') +
+        rowHTML('地支', zhis, 'gz') +
+        rowHTML('五行', wxs, 'wx');
       rootEl.querySelector('#mlFour').innerHTML = '<h2 class="h2"><span class="n">3</span>四柱排盘</h2>' +
-        '<div class="hint">年柱＝岁序 · 月柱＝平气月 · 日柱＝连续干支 · 时柱＝时辰。</div>' +
+        '<div class="hint">年柱＝岁序 · 月柱＝平气月 · 日柱＝连续干支 · 时柱＝时辰；十神以日干为基准。</div>' +
         '<div class="card tight"><table class="four-table"><thead><tr>' +
         '<th>—</th><th>年柱</th><th>月柱</th><th>日柱</th><th>时柱</th></tr></thead><tbody>' + body + '</tbody></table></div>';
     }
@@ -200,9 +199,12 @@
       var html = list.map(function (x, i) {
         var cur = today >= dateNum(x.start) && today <= dateNum(x.end);
         var s = x.sky;
+        var tg = root.ML.tenGod(r.pillars[2].charAt(0), x.pillar.charAt(0));
         return '<div class="dxi' + (cur ? ' current' : '') + '">' +
           '<div class="dxh">' +
-            '<span class="dxl"><b>第 ' + (i + 1) + ' 运 · ' + x.pillar + '</b><i>' + x.startAge + '~' + x.endAge + ' 岁</i>' +
+            '<span class="dxl"><b>第 ' + (i + 1) + ' 运 · ' + x.pillar + '</b>' +
+              (tg ? '<em class="dxg" title="大限十神">' + tg + '</em>' : '') +
+              '<i>' + x.startAge + '~' + x.endAge + ' 岁</i>' +
               (cur ? '<em class="dxtag">当前</em>' : '') + '</span>' +
             '<span class="dxr">' + dateText(x.start) + ' ~ ' + dateText(x.end) + '</span>' +
           '</div>' +
@@ -216,7 +218,7 @@
       }).join('');
       var startAge = list.length ? list[0].startAge : 0;
       rootEl.querySelector('#mlDx').innerHTML = '<h2 class="h2"><span class="n">5</span>十年大限 · 四柱大运</h2>' +
-        '<div class="hint">按新修四柱起运（本盘 ' + startAge + ' 岁起运），每运 3600 天；每运开头时太阳、月亮、木星在黄道的位置。</div>' +
+        '<div class="hint">按新修四柱起运（本盘 ' + startAge + ' 岁起运），每运 3600 天；大限干支的十神以日干为基准。每运开头时太阳、月亮、木星在黄道的位置。</div>' +
         '<div class="dx-legend"><span><i class="lgsun"></i>太阳</span><span><i class="lgmoon"></i>月亮</span><span><i class="lgjup"></i>木星</span></div>' +
         '<div class="dx">' + html + '</div>';
     }
@@ -242,6 +244,7 @@
       hourText = hourText.split('（')[0].trim();
       var copyText = '一恒体系 · 命理\n出生：' + $d.value + ' ' + hourText + ' ' + $g.value +
         '\n四柱：' + r.pillars.join(' ') +
+        '\n十神：' + (r.gods || []).join(' ') +
         '\n农历 ' + r.lunar.month + '月' + r.lunar.day + '日 · 岁序 ' + r.year + ' · 平气月 ' + r.month;
       var wxId = (YH.WX && YH.WX.id) || 'xy1618fff';
       var opts = {

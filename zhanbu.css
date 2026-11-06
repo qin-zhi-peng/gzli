@@ -289,49 +289,54 @@
 
 .zb-rows { margin-top: 6px; }
 
-/* 六列：六神 | 伏神 | 主卦六亲干支 | 主卦爻象 | 变卦六亲干支 | 变卦爻象
-   六神按爻位（主变同位同神）只列一次，伏神只属主卦，所以左两列是共用的。
+/* 六列固定表格：六神 | 伏神 | 主卦六亲干支 | 主卦爻象 | 变卦六亲干支 | 变卦爻象
+   用 table-layout:fixed 让每一行的列宽完全一致，爻线另用固定宽度，不再随行伸缩。
    安静卦（无动爻）没有变卦，整块收成四列。 */
-.zb-legend,
-.zb-row {
-  display: grid;
-  grid-template-columns: 21px 42px max-content minmax(0, 1fr) max-content minmax(0, 1fr);
-  gap: 4px;
+.zb-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
-.zb-board.quiet .zb-legend,
-.zb-board.quiet .zb-row {
-  grid-template-columns: 21px 42px max-content minmax(0, 1fr);
-}
-.zb-legend {
-  padding: 0 2px 4px;
+.zb-tbl col.zc-sp { width: 8%; }
+.zb-tbl col.zc-fu { width: 18%; }
+.zb-tbl col.zc-m { width: 19%; }
+.zb-tbl col.zc-s { width: 18%; }
+.zb-tbl col.zc-c { width: 19%; }
+.zb-tbl col.zc-s2 { width: 18%; }
+.zb-board.quiet .zb-tbl col.zc-sp { width: 11%; }
+.zb-board.quiet .zb-tbl col.zc-fu { width: 23%; }
+.zb-board.quiet .zb-tbl col.zc-m { width: 36%; }
+.zb-board.quiet .zb-tbl col.zc-s { width: 30%; }
+
+.zb-legend th {
+  padding: 0 2px 5px;
   font-size: 9.5px;
+  font-weight: 400;
   color: var(--dim2);
   text-align: center;
   letter-spacing: .5px;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line2);
 }
-.zb-legend span { white-space: nowrap; }
-.zb-legend .zb-lg { color: var(--dim); }
-.zb-legend .zb-lg-main { grid-column: 3 / span 2; }
-.zb-legend .zb-lg-chg { grid-column: 5 / span 2; color: var(--gold); border-left: 1px dashed var(--line2); }
+.zb-legend .zb-th-main { color: var(--dim); }
+.zb-legend .zb-th-chg { color: var(--gold); border-left: 1px dashed var(--line2); }
 
-.zb-row {
-  align-items: center;
+.zb-row td {
   padding: 5px 2px;
-  border-radius: 8px;
+  vertical-align: middle;
   border-bottom: 1px solid var(--line);
-  min-width: 0;
+  overflow: hidden;
 }
-.zb-row:last-child { border-bottom: 0; }
-.zb-row.mov { background: rgba(216, 180, 106, .05); }
-.zb-row.yong {
-  background: rgba(216, 180, 106, .1);
-  box-shadow: inset 2px 0 0 var(--gold);
-}
+.zb-row:last-child td { border-bottom: 0; }
+.zb-row.mov td { background: rgba(216, 180, 106, .05); }
+.zb-row.yong td { background: rgba(216, 180, 106, .1); }
+.zb-row.yong td:first-child { box-shadow: inset 2px 0 0 var(--gold); }
 
 .zb-spirit { font-size: 10px; color: var(--dim); text-align: center; letter-spacing: -.5px; line-height: 1.2; }
+.zb-row td.zb-spirit { padding-left: 0; padding-right: 0; }
 .zb-fus,
 .zb-main,
-.zb-chg { display: block; min-width: 0; }
+.zb-chg { overflow: hidden; }
 .zb-chg {
   padding-left: 6px;
   border-left: 1px dashed var(--line2);
@@ -387,18 +392,27 @@
 .zb-wx-shui { color: #8fa6bd; }
 
 .zb-sym {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
 }
-.zb-sym2 { gap: 0; }
-.zb-line {
-  display: flex;
+.zb-row td.zb-sym {
+  padding-left: 0;
+  padding-right: 0;
+}
+.zb-symbox {
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  flex: 1 1 auto;
-  min-width: 0;
+  justify-content: center;
+  gap: 3px;
+  vertical-align: middle;
+}
+.zb-line {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 36px;
+  flex: 0 0 36px;
 }
 .zb-bar {
   display: block;
@@ -408,7 +422,7 @@
   flex: 0 0 auto;
 }
 .zb-bar.full { width: 100%; }
-.zb-bar.half { width: calc(50% - 3px); }
+.zb-bar.half { width: calc(50% - 2px); }
 .zb-row.mov .zb-bar { background: linear-gradient(180deg, #f0a294, var(--red2) 55%, var(--red)); }
 .zb-mk {
   flex: 0 0 11px;
@@ -545,10 +559,9 @@
 
 /* ---------------------------------------------------------------- 窄屏微调 */
 @media (max-width: 359px) {
-  .zb-row,
-  .zb-legend { grid-template-columns: 18px 38px max-content minmax(0, 1fr) max-content minmax(0, 1fr); gap: 3px; }
-  .zb-board.quiet .zb-row,
-  .zb-board.quiet .zb-legend { grid-template-columns: 18px 38px max-content minmax(0, 1fr); }
+  .zb-line { width: 30px; flex-basis: 30px; }
+  .zb-mk { flex-basis: 10px; font-size: 11px; }
+  .zb-bar.half { width: calc(50% - 1.5px); }
   .zb-f1 { font-size: 11px; }
   .zb-mopt { font-size: 11px; }
   .zb-spirit { font-size: 9.5px; }
@@ -556,10 +569,7 @@
   .zb-role { margin-left: 2px; }
 }
 @media (min-width: 560px) {
-  .zb-row,
-  .zb-legend { grid-template-columns: 26px 54px max-content minmax(0, 1fr) max-content minmax(0, 1fr); gap: 6px; }
-  .zb-board.quiet .zb-row,
-  .zb-board.quiet .zb-legend { grid-template-columns: 26px 54px max-content minmax(0, 1fr); }
+  .zb-line { width: 48px; flex-basis: 48px; }
   .zb-f1 { font-size: 12.5px; }
   .zb-f2 { font-size: 10.5px; }
   .zb-bar { height: 8px; }
@@ -590,5 +600,6 @@
   .zb-kq { margin-top: 8px; line-height: 1.7; }
   .zb-f1 { font-size: 13px; }
   .zb-f2 { font-size: 10.5px; }
+  .zb-line { width: 56px; flex-basis: 56px; }
   .zb-bar { height: 9px; }
 }

@@ -797,34 +797,38 @@
       var rows = [];
       for (var no = 6; no >= 1; no--) {
         var ln = H.lines[no - 1];
-        rows.push('<div class="zb-row' + (ln.moving ? ' mov' : '') + '">');
+        rows.push('<tr class="zb-row' + (ln.moving ? ' mov' : '') + '">');
         /* 六神按爻位，主变同位同神，只列一次 */
-        rows.push('<span class="zb-spirit">' + esc(ln.spirit) + '</span>');
-        rows.push('<span class="zb-fus' + (ln.hidden.missingRelation ? ' miss' : '') + '">' +
+        rows.push('<td class="zb-spirit">' + esc(ln.spirit) + '</td>');
+        rows.push('<td class="zb-fus' + (ln.hidden.missingRelation ? ' miss' : '') + '">' +
           '<i class="zb-f1">' + esc(ln.hidden.relation) + '</i>' +
-          '<i class="zb-f2">' + esc(ln.hidden.stem + ln.hidden.branch) + wxHTML(ln.hidden.element) + '</i></span>');
-        rows.push('<span class="zb-main">' +
+          '<i class="zb-f2">' + esc(ln.hidden.stem + ln.hidden.branch) + wxHTML(ln.hidden.element) + '</i></td>');
+        rows.push('<td class="zb-main">' +
           '<i class="zb-f1">' + esc(ln.relation) + roleHTML(ln.role, false) + '</i>' +
-          '<i class="zb-f2">' + esc(ln.stem + ln.branch) + wxHTML(ln.element) + kongHTML(ln.branch) + '</i></span>');
-        rows.push('<span class="zb-sym">' + lineSymbolHTML(ln) + '<em class="zb-mk">' +
-          (ln.marker === 'O' ? '○' : ln.marker === 'X' ? '×' : '') + '</em></span>');
+          '<i class="zb-f2">' + esc(ln.stem + ln.branch) + wxHTML(ln.element) + kongHTML(ln.branch) + '</i></td>');
+        rows.push('<td class="zb-sym"><span class="zb-symbox">' + lineSymbolHTML(ln) + '<em class="zb-mk">' +
+          (ln.marker === 'O' ? '○' : ln.marker === 'X' ? '×' : '') + '</em></span></td>');
         if (hasCh) {
-          rows.push('<span class="zb-chg">' +
+          rows.push('<td class="zb-chg">' +
             '<i class="zb-f1">' + esc(ln.changedRelation) + roleHTML(ln.changedRole, true) + '</i>' +
-            '<i class="zb-f2">' + esc(ln.changedStem + ln.changedBranch) + wxHTML(ln.changedElement) + kongHTML(ln.changedBranch) + '</i></span>');
-          rows.push('<span class="zb-sym zb-sym2">' + lineSymbolHTML({ yang: ln.moving ? 1 - ln.yang : ln.yang }) + '<em class="zb-mk"></em></span>');
+            '<i class="zb-f2">' + esc(ln.changedStem + ln.changedBranch) + wxHTML(ln.changedElement) + kongHTML(ln.changedBranch) + '</i></td>');
+          rows.push('<td class="zb-sym"><span class="zb-symbox">' + lineSymbolHTML({ yang: ln.moving ? 1 - ln.yang : ln.yang }) + '<em class="zb-mk"></em></span></td>');
         }
-        rows.push('</div>');
+        rows.push('</tr>');
       }
 
-      var legend = '<div class="zb-legend"><span>六神</span><span>伏神</span>' +
-        '<span class="zb-lg zb-lg-main">主卦</span>' +
-        (hasCh ? '<span class="zb-lg zb-lg-chg">变卦</span>' : '') + '</div>';
+      var legend = '<tr class="zb-legend"><th class="zb-th-sp">六神</th><th class="zb-th-fu">伏神</th>' +
+        '<th class="zb-th-main" colspan="2">主卦</th>' +
+        (hasCh ? '<th class="zb-th-chg" colspan="2">变卦</th>' : '') + '</tr>';
+      var cols = '<colgroup>' + (hasCh
+        ? '<col class="zc-sp"><col class="zc-fu"><col class="zc-m"><col class="zc-s"><col class="zc-c"><col class="zc-s2">'
+        : '<col class="zc-sp"><col class="zc-fu"><col class="zc-m"><col class="zc-s">') + '</colgroup>';
       var tips = '<div class="zb-tips"><span>○ 老阳动</span><span>× 老阴动</span>' +
         '<span class="zb-tipwx">五行：' + wxHTML('木') + wxHTML('火') + wxHTML('土') + wxHTML('金') + wxHTML('水') + '</span>' +
         '<span>' + (hasCh ? '六神按爻位；伏神、变卦六亲依主卦宫' : '六神按爻位；伏神六亲依主卦宫') + '</span></div>';
       return '<div class="zb-board' + (hasCh ? '' : ' quiet') + '">' + head.join('') +
-        '<div class="zb-rows">' + legend + rows.join('') + '</div>' + tips + '</div>';
+        '<div class="zb-rows"><table class="zb-tbl">' + cols +
+        '<thead>' + legend + '</thead><tbody>' + rows.join('') + '</tbody></table></div>' + tips + '</div>';
     }
 
     /* 微信联系卡：页面上不再生成断卦结论，改为引导一对一 */

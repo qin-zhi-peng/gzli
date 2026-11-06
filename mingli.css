@@ -16,6 +16,13 @@
 .four-table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
 .four-table th{color:#8a7d68;font-weight:400;text-align:left;padding:6px 4px}
 .four-table th+th{color:var(--gold2);font-weight:600}
+.four-table td{padding:6px 4px;white-space:nowrap}
+.four-table .ft-lbl{color:#8a7d68;font-size:12.5px}
+.four-table .ft-god{color:var(--gold2);font-size:12.5px;font-weight:500;letter-spacing:.5px}
+.four-table .ft-god.ft-yuan{color:var(--gold);font-size:11.5px;letter-spacing:1px}
+.four-table .ft-gz{color:var(--text);font-size:15px;font-weight:600;letter-spacing:1px}
+.four-table .ft-wx{color:var(--gold);font-size:13.5px;letter-spacing:2px}
+.four-table .ft-day{background:rgba(216,180,106,.05)}
 
 /* 天体图 */
 .sky{background:linear-gradient(180deg,#14100b,#100d0a);border:1px solid var(--line);border-radius:16px;padding:6px 4px 2px}
@@ -47,6 +54,7 @@
 .dxl{min-width:0}
 .dxl b{color:var(--gold2);font-size:13px;white-space:nowrap}
 .dxl i{font-style:normal;color:var(--dim);font-size:11.5px;margin-left:7px;white-space:nowrap}
+.dxg{display:inline-block;font-style:normal;font-size:10px;line-height:1.5;color:var(--gold);border:1px solid var(--line2);background:var(--panel2);border-radius:999px;padding:0 6px;margin-left:6px;white-space:nowrap;vertical-align:1px}
 .dxr{color:var(--dim2);font-size:11px;white-space:nowrap;flex:0 0 auto}
 .dxtag{display:inline-block;font-style:normal;font-size:10px;line-height:1.5;color:#1a1409;background:var(--gold);border-radius:999px;padding:0 6px;margin-left:6px;white-space:nowrap;vertical-align:1px}
 .strip{position:relative;height:16px;margin:7px 0 3px;border-radius:8px;background:#1c1710;overflow:hidden}
